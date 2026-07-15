@@ -288,6 +288,9 @@ class DBManager {
     init() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(this.dbName, 3); // Upgraded to v3 to support price overrides
+            request.onblocked = () => {
+                console.warn("Database upgrade blocked by another open tab.");
+            };
             request.onupgradeneeded = (e) => {
                 const db = e.target.result;
                 if (!db.objectStoreNames.contains('portfolio_items')) {
@@ -303,6 +306,10 @@ class DBManager {
             };
             request.onsuccess = (e) => {
                 this.db = e.target.result;
+                this.db.onversionchange = () => {
+                    this.db.close();
+                    location.reload();
+                };
                 resolve();
             };
             request.onerror = (e) => reject(e.target.error);
