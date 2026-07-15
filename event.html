@@ -73,7 +73,11 @@
 
         <!-- Gallery Operations HUD Info -->
         <div class="gallery-header-hud">
-            <div>DB_SECTOR: EVENTS // ACTIVE_ITEMS: 06</div>
+            <div>DB_SECTOR: EVENTS // ACTIVE_ITEMS: <span id="gallery-counter">06</span></div>
+            <button class="btn-add-item" id="btn-open-upload" aria-label="Upload New Event">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Add Custom Event</span>
+            </button>
             <div>STATUS: DISPLAYING_PORTFOLIO</div>
         </div>
 
@@ -210,6 +214,41 @@
             <h3 class="lightbox-title">Image Title</h3>
             <p class="lightbox-desc">Detailed descriptions appear here.</p>
             <span class="lightbox-counter">IMAGE -- OF --</span>
+        </div>
+    </div>
+
+    <!-- Upload Modal Overlay -->
+    <div id="upload-modal-overlay" class="modal-overlay">
+        <div class="upload-modal">
+            <div class="modal-header">
+                <span class="modal-title">Upload Custom Event</span>
+                <button class="modal-close-btn" id="btn-close-upload" aria-label="Close Modal">
+                    <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+            <form id="upload-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label class="form-label">Event Image File</label>
+                    <div class="file-dropzone" id="dropzone">
+                        <input type="file" id="input-file" accept="image/*" style="display: none;">
+                        <div class="dropzone-text" id="dropzone-text">
+                            Drag & drop or <span>browse file</span>
+                        </div>
+                        <div class="preview-container" id="preview-container">
+                            <img src="" alt="Upload preview" class="preview-img" id="preview-img">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-title">Title</label>
+                    <input type="text" id="input-title" class="form-input" placeholder="e.g. Neon Stage Setup" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-desc">Description</label>
+                    <textarea id="input-desc" class="form-input" rows="3" placeholder="Describe your event setup and details..." required style="resize: none;"></textarea>
+                </div>
+                <button type="submit" class="btn-submit-upload" id="btn-submit-upload">Upload to Portal</button>
+            </form>
         </div>
     </div>
 

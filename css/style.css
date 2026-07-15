@@ -1145,3 +1145,313 @@ header {
         top: 105%;
     }
 }
+
+/* 
+========================================================================
+   DYNAMIC CMS & DYNAMIC PHOTO UPLOADER (IndexedDB Powered)
+======================================================================== 
+*/
+
+/* Add Item Button in Gallery Header HUD */
+.btn-add-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px dashed var(--neon-cyan);
+    border-radius: 6px;
+    color: var(--neon-cyan);
+    font-family: var(--font-cyber);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+}
+
+.btn-add-item:hover {
+    background: rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    border-style: solid;
+    transform: translateY(-1px);
+}
+
+.gallery-event .btn-add-item {
+    border-color: var(--neon-magenta);
+    color: var(--neon-magenta);
+    background: rgba(255, 0, 127, 0.05);
+}
+
+.gallery-event .btn-add-item:hover {
+    background: rgba(255, 0, 127, 0.1);
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.3);
+}
+
+.gallery-interior .btn-add-item {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.gallery-interior .btn-add-item:hover {
+    background: rgba(0, 255, 136, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+/* Sleek Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(5, 5, 10, 0.85);
+    backdrop-filter: blur(15px);
+    z-index: 990;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-smooth);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.upload-modal {
+    background: var(--bg-dark-panel);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    padding: 35px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    transform: translateY(-20px);
+    transition: transform var(--transition-smooth);
+    position: relative;
+    z-index: 995;
+}
+
+.modal-overlay.active .upload-modal {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    font-family: var(--font-cyber);
+}
+
+.modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.modal-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+    color: var(--neon-cyan);
+}
+
+.gallery-event .modal-close-btn:hover { color: var(--neon-magenta); }
+.gallery-interior .modal-close-btn:hover { color: var(--neon-green); }
+
+.modal-close-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-family: var(--font-cyber);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.form-input {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.gallery-event .form-input:focus {
+    border-color: var(--neon-magenta);
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+}
+
+.gallery-interior .form-input:focus {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+.file-dropzone {
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.01);
+    transition: all var(--transition-smooth);
+}
+
+.file-dropzone:hover {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: var(--neon-cyan);
+}
+
+.gallery-event .file-dropzone:hover { border-color: var(--neon-magenta); }
+.gallery-interior .file-dropzone:hover { border-color: var(--neon-green); }
+
+.dropzone-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.dropzone-text span {
+    color: var(--neon-cyan);
+    text-decoration: underline;
+}
+
+.gallery-event .dropzone-text span { color: var(--neon-magenta); }
+.gallery-interior .dropzone-text span { color: var(--neon-green); }
+
+.preview-container {
+    display: none;
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+}
+
+.preview-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-submit-upload {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+    color: var(--text-primary);
+    font-family: var(--font-cyber);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    margin-top: 10px;
+}
+
+.btn-submit-upload:hover {
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+.gallery-event .btn-submit-upload {
+    background: linear-gradient(90deg, var(--neon-magenta), var(--neon-purple));
+}
+
+.gallery-event .btn-submit-upload:hover {
+    box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+}
+
+.gallery-interior .btn-submit-upload {
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+}
+
+.gallery-interior .btn-submit-upload:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+/* Card Delete Button (CMS) */
+.delete-card-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(13, 13, 27, 0.85);
+    border: 1px solid rgba(255, 0, 127, 0.3);
+    color: var(--neon-magenta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all var(--transition-smooth);
+    z-index: 10;
+}
+
+.gallery-card:hover .delete-card-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.delete-card-btn:hover {
+    background: var(--neon-magenta);
+    color: var(--text-primary);
+    box-shadow: 0 0 12px var(--neon-magenta);
+    border-color: var(--neon-magenta);
+}
+
+.delete-card-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+}
+
