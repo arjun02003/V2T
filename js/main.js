@@ -287,7 +287,7 @@ class DBManager {
 
     init() {
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open(this.dbName, 2); // Upgraded to v2 to match schema migration
+            const request = indexedDB.open(this.dbName, 3); // Upgraded to v3 to support price overrides
             request.onupgradeneeded = (e) => {
                 const db = e.target.result;
                 if (!db.objectStoreNames.contains('portfolio_items')) {
@@ -296,6 +296,9 @@ class DBManager {
                 }
                 if (!db.objectStoreNames.contains('deleted_static_items')) {
                     db.createObjectStore('deleted_static_items', { keyPath: 'cardId' });
+                }
+                if (!db.objectStoreNames.contains('overridden_prices')) {
+                    db.createObjectStore('overridden_prices', { keyPath: 'itemId' });
                 }
             };
             request.onsuccess = (e) => {
@@ -326,6 +329,20 @@ class DBManager {
             request.onerror = () => reject(request.error);
         });
     }
+
+    getOverriddenPrices() {
+        return new Promise((resolve, reject) => {
+            if (!this.db.objectStoreNames.contains('overridden_prices')) {
+                resolve([]);
+                return;
+            }
+            const transaction = this.db.transaction('overridden_prices', 'readonly');
+            const store = transaction.objectStore('overridden_prices');
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
 }
 
 const dbManager = new DBManager();
@@ -346,6 +363,9 @@ async function initCMS() {
         
         // 2. Load custom items matching current category
         await loadCustomItems();
+
+        // 3. Apply custom price overrides
+        await applyOverriddenPrices();
     } catch (err) {
         console.error("CMS load failed:", err);
     }
@@ -372,6 +392,23 @@ async function loadCustomItems() {
     });
 
     updateItemCounter();
+}
+
+async function applyOverriddenPrices() {
+    try {
+        const overrides = await dbManager.getOverriddenPrices();
+        overrides.forEach(x => {
+            const card = document.getElementById(x.itemId);
+            if (card) {
+                const priceEl = card.querySelector('.gallery-price');
+                if (priceEl) {
+                    priceEl.textContent = x.price;
+                }
+            }
+        });
+    } catch (e) {
+        console.error("Error applying price overrides:", e);
+    }
 }
 
 function updateItemCounter() {

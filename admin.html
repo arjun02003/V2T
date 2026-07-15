@@ -181,7 +181,7 @@
 
             init() {
                 return new Promise((resolve, reject) => {
-                    const request = indexedDB.open(this.dbName, 2); // Upgraded to v2 to enforce schema sync
+                    const request = indexedDB.open(this.dbName, 3); // Upgraded to v3 to support price overrides
                     request.onupgradeneeded = (e) => {
                         const db = e.target.result;
                         if (!db.objectStoreNames.contains('portfolio_items')) {
@@ -190,6 +190,9 @@
                         }
                         if (!db.objectStoreNames.contains('deleted_static_items')) {
                             db.createObjectStore('deleted_static_items', { keyPath: 'cardId' });
+                        }
+                        if (!db.objectStoreNames.contains('overridden_prices')) {
+                            db.createObjectStore('overridden_prices', { keyPath: 'itemId' });
                         }
                     };
                     request.onsuccess = (e) => {
@@ -256,6 +259,26 @@
                     const transaction = this.db.transaction('deleted_static_items', 'readwrite');
                     const store = transaction.objectStore('deleted_static_items');
                     const request = store.delete(cardId);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            getOverriddenPrices() {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('overridden_prices', 'readonly');
+                    const store = transaction.objectStore('overridden_prices');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            savePriceOverride(itemId, price) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('overridden_prices', 'readwrite');
+                    const store = transaction.objectStore('overridden_prices');
+                    const request = store.put({ itemId, price });
                     request.onsuccess = () => resolve();
                     request.onerror = () => reject(request.error);
                 });
@@ -355,9 +378,17 @@
             const customList = await db.getCustomItems(currentTabCategory);
             const deletedStaticIds = await db.getDeletedStaticIds();
 
+            // Fetch price overrides
+            const overriddenPricesList = await db.getOverriddenPrices();
+            const overriddenPricesMap = {};
+            overriddenPricesList.forEach(x => {
+                overriddenPricesMap[x.itemId] = x.price;
+            });
+
             // 1. Render Static Items
             staticList.forEach(item => {
                 const isHidden = deletedStaticIds.includes(item.id);
+                const displayedPrice = overriddenPricesMap[item.id] || item.price;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
@@ -377,7 +408,10 @@
                         </span>
                     </td>
                     <td>
-                        <span class="admin-price-val">${item.price}</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="admin-price-val">${displayedPrice}</span>
+                            <button class="btn-admin-action" onclick="editPrice('${item.id}', '${displayedPrice}')" style="padding: 2px 6px; font-size: 0.65rem;">Edit</button>
+                        </div>
                     </td>
                     <td style="text-align: right;">
                         ${isHidden 
@@ -391,6 +425,8 @@
 
             // 2. Render Custom Items
             customList.forEach(item => {
+                const cardId = `custom-card-${item.id}`;
+                const displayedPrice = overriddenPricesMap[cardId] || item.price;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
@@ -408,7 +444,10 @@
                         <span class="admin-item-type-badge badge-custom">UPLOADED</span>
                     </td>
                     <td>
-                        <span class="admin-price-val">${item.price}</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="admin-price-val">${displayedPrice}</span>
+                            <button class="btn-admin-action" onclick="editPrice('${cardId}', '${displayedPrice}')" style="padding: 2px 6px; font-size: 0.65rem;">Edit</button>
+                        </div>
                     </td>
                     <td style="text-align: right;">
                         <button class="btn-admin-action btn-delete" onclick="deleteCustom(${item.id})">Delete</button>
@@ -421,6 +460,20 @@
                 listTable.innerHTML = `<tr><td colspan="5" class="empty-state-text">No items active in this sector.</td></tr>`;
             }
         }
+
+        // Actions: Edit price
+        window.editPrice = async function(itemId, currentPrice) {
+            const newPrice = prompt(`Enter new price for this item:`, currentPrice);
+            if (newPrice !== null && newPrice.trim() !== "") {
+                try {
+                    await db.savePriceOverride(itemId, newPrice.trim());
+                    await renderItems();
+                } catch (err) {
+                    console.error("Failed to override price:", err);
+                    alert("Error saving price. Try again.");
+                }
+            }
+        };
 
         // Actions: Hide static
         window.hideStatic = async function(cardId) {
@@ -440,6 +493,9 @@
         window.deleteCustom = async function(id) {
             if (confirm("Are you sure you want to permanently delete this uploaded item?")) {
                 await db.deleteCustomItem(id);
+                // Also clean up its price override if any
+                const cardId = `custom-card-${id}`;
+                await db.restoreStaticItem(cardId); // Deletes from overrides as they share key structure
                 await renderItems();
             }
         };
