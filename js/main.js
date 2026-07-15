@@ -1,7 +1,7 @@
 /* 
 ========================================================================
    V2T GROUPS - Premium Futuristic 3D Dashboard & Gallery JS Controller
-   Logic: Canvas Particles, 3D Tilt, HUD Updates, Lightbox & IndexedDB CMS
+   Logic: Canvas Particles, 3D Tilt, HUD Updates, Lightbox & IndexedDB Loader
 ======================================================================== 
 */
 
@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     initCanvasParticles();
     init3DTilt();
     
-    // Initialize IndexedDB CMS (appends custom uploaded images to the DOM)
+    // Initialize client CMS load (hides removed static items, appends custom ones)
     await initCMS();
     
-    // Initialize Lightbox (gathers both static and user-uploaded cards)
+    // Initialize Lightbox (gathers both static and custom cards for slide preview)
     initLightbox();
 });
 
@@ -28,7 +28,6 @@ function initHUDClock() {
         const mins = String(now.getMinutes()).padStart(2, '0');
         const secs = String(now.getSeconds()).padStart(2, '0');
         
-        // Output format: SYSTEM TIME: HH:MM:SS LCL
         timeDisplay.textContent = `SYSTEM TIME: ${hrs}:${mins}:${secs} LCL`;
     }
     
@@ -148,7 +147,7 @@ function init3DTilt() {
     });
 }
 
-/* --- Fullscreen Lightbox Image Gallery (Event Delegation Powered) --- */
+/* --- Fullscreen Lightbox Image Gallery (Event Delegation) --- */
 let galleryItems = [];
 let currentIndex = 0;
 let lightboxInitialized = false;
@@ -157,10 +156,9 @@ function initLightbox() {
     const lightbox = document.getElementById('lightbox');
     if (!lightbox) return;
 
-    // Build array of items currently in the DOM
     rebuildGalleryItems();
 
-    if (lightboxInitialized) return; // Prevent binding button/global handlers multiple times
+    if (lightboxInitialized) return;
 
     const lightboxImg = lightbox.querySelector('.lightbox-img');
     const lightboxTitle = lightbox.querySelector('.lightbox-title');
@@ -206,6 +204,8 @@ function initLightbox() {
             lightboxImg.src = item.src;
             lightboxTitle.textContent = item.title;
             lightboxDesc.textContent = item.desc;
+            
+            // Format counter display
             lightboxCounter.textContent = `IMAGE ${currentIndex + 1} OF ${galleryItems.length}`;
             
             lightboxImg.style.transform = 'scale(1)';
@@ -213,7 +213,6 @@ function initLightbox() {
         }, 120);
     }
 
-    // Button Events
     closeBtn.addEventListener('click', closeLightbox);
     nextBtn.addEventListener('click', showNext);
     prevBtn.addEventListener('click', showPrev);
@@ -235,23 +234,13 @@ function initLightbox() {
         }
     });
 
-    // Event Delegation on Gallery Grid container
+    // Delegated click handler on gallery grid
     const galleryGrid = document.querySelector('.gallery-grid');
     if (galleryGrid) {
         galleryGrid.addEventListener('click', (e) => {
-            // Delete click
-            const deleteBtn = e.target.closest('.delete-card-btn');
-            if (deleteBtn) {
-                e.stopPropagation();
-                const card = deleteBtn.closest('.gallery-card');
-                deleteCustomItem(card);
-                return;
-            }
-
-            // Card click
             const card = e.target.closest('.gallery-card');
             if (card) {
-                rebuildGalleryItems(); // Refresh items in case changes were made
+                rebuildGalleryItems();
                 const allCards = Array.from(document.querySelectorAll('.gallery-card'));
                 const index = allCards.indexOf(card);
                 if (index !== -1) {
@@ -264,14 +253,20 @@ function initLightbox() {
     lightboxInitialized = true;
 }
 
-// Scrapes the current DOM gallery card structure and populates array
 function rebuildGalleryItems() {
     const galleryCards = document.querySelectorAll('.gallery-card');
     galleryItems = [];
     galleryCards.forEach(card => {
         const img = card.querySelector('.gallery-img');
         const title = card.querySelector('.gallery-card-title').textContent;
-        const desc = card.querySelector('.gallery-card-desc').textContent;
+        
+        // Build lightbox description: Appends price if it exists on card
+        let desc = card.querySelector('.gallery-card-desc').textContent;
+        const priceEl = card.querySelector('.gallery-price');
+        if (priceEl) {
+            desc += ` | Price: ${priceEl.textContent}`;
+        }
+        
         const src = img.getAttribute('src');
         galleryItems.push({ src, title, desc });
     });
@@ -280,14 +275,13 @@ function rebuildGalleryItems() {
 
 /* 
 ========================================================================
-   DYNAMIC CLIENT-SIDE CMS (IndexedDB Powered)
+   PUBLIC DATABASE LOADER (IndexedDB Powered)
 ======================================================================== 
 */
 
 class DBManager {
     constructor() {
         this.dbName = 'v2t_groups_cms';
-        this.storeName = 'portfolio_items';
         this.db = null;
     }
 
@@ -296,9 +290,12 @@ class DBManager {
             const request = indexedDB.open(this.dbName, 1);
             request.onupgradeneeded = (e) => {
                 const db = e.target.result;
-                if (!db.objectStoreNames.contains(this.storeName)) {
-                    const store = db.createObjectStore(this.storeName, { keyPath: 'id', autoIncrement: true });
+                if (!db.objectStoreNames.contains('portfolio_items')) {
+                    const store = db.createObjectStore('portfolio_items', { keyPath: 'id', autoIncrement: true });
                     store.createIndex('category', 'category', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('deleted_static_items')) {
+                    db.createObjectStore('deleted_static_items', { keyPath: 'cardId' });
                 }
             };
             request.onsuccess = (e) => {
@@ -311,8 +308,8 @@ class DBManager {
 
     getItems(category) {
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(this.storeName, 'readonly');
-            const store = transaction.objectStore(this.storeName);
+            const transaction = this.db.transaction('portfolio_items', 'readonly');
+            const store = transaction.objectStore('portfolio_items');
             const index = store.index('category');
             const request = index.getAll(category);
             request.onsuccess = () => resolve(request.result);
@@ -320,22 +317,12 @@ class DBManager {
         });
     }
 
-    addItem(item) {
+    getDeletedStaticIds() {
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(this.storeName, 'readwrite');
-            const store = transaction.objectStore(this.storeName);
-            const request = store.add(item);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    deleteItem(id) {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(this.storeName, 'readwrite');
-            const store = transaction.objectStore(this.storeName);
-            const request = store.delete(id);
-            request.onsuccess = () => resolve();
+            const transaction = this.db.transaction('deleted_static_items', 'readonly');
+            const store = transaction.objectStore('deleted_static_items');
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result.map(x => x.cardId));
             request.onerror = () => reject(request.error);
         });
     }
@@ -344,7 +331,6 @@ class DBManager {
 const dbManager = new DBManager();
 let currentCategory = null;
 
-// Identify category
 if (document.body.classList.contains('gallery-art')) currentCategory = 'art';
 else if (document.body.classList.contains('gallery-event')) currentCategory = 'event';
 else if (document.body.classList.contains('gallery-interior')) currentCategory = 'interior';
@@ -354,11 +340,25 @@ async function initCMS() {
 
     try {
         await dbManager.init();
+        
+        // 1. Hide default cards marked as deleted by admin
+        await hideDeletedStaticCards();
+        
+        // 2. Load custom items matching current category
         await loadCustomItems();
-        setupUploadModal();
     } catch (err) {
-        console.error("Failed to initialize client CMS database:", err);
+        console.error("CMS load failed:", err);
     }
+}
+
+async function hideDeletedStaticCards() {
+    const deletedIds = await dbManager.getDeletedStaticIds();
+    deletedIds.forEach(id => {
+        const card = document.getElementById(id);
+        if (card) {
+            card.remove();
+        }
+    });
 }
 
 async function loadCustomItems() {
@@ -385,9 +385,6 @@ function createCustomCardHTML(item) {
     const prefix = currentCategory === 'art' ? 'ART' : currentCategory === 'event' ? 'EVT' : 'INT';
     return `
         <div class="gallery-card custom-card" id="custom-card-${item.id}" data-db-id="${item.id}">
-            <button class="delete-card-btn" aria-label="Delete Card">
-                <svg viewBox="0 0 24 24"><path d="M19 7l-.8 13.3c0 1-.9 1.7-1.9 1.7H7.7c-1 0-1.8-.7-1.9-1.7L5 7M10 11v6M14 11v6M9 7V4c0-.6.4-1 1-1h4c.6 0 1 .4 1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
             <div class="gallery-img-container">
                 <img src="${item.src}" alt="${item.title}" class="gallery-img" loading="lazy">
             </div>
@@ -397,130 +394,8 @@ function createCustomCardHTML(item) {
                     <h3 class="gallery-card-title">${item.title}</h3>
                     <p class="gallery-card-desc">${item.desc}</p>
                 </div>
+                <div class="gallery-price">${item.price}</div>
             </div>
         </div>
     `;
-}
-
-async function deleteCustomItem(card) {
-    const dbId = parseInt(card.getAttribute('data-db-id'));
-    if (confirm("Are you sure you want to remove this custom project from the gallery?")) {
-        try {
-            await dbManager.deleteItem(dbId);
-            card.remove();
-            rebuildGalleryItems();
-            updateItemCounter();
-        } catch (err) {
-            console.error("Delete from IndexedDB failed:", err);
-        }
-    }
-}
-
-function setupUploadModal() {
-    const overlay = document.getElementById('upload-modal-overlay');
-    const openBtn = document.getElementById('btn-open-upload');
-    const closeBtn = document.getElementById('btn-close-upload');
-    const form = document.getElementById('upload-form');
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('input-file');
-    const previewContainer = document.getElementById('preview-container');
-    const previewImg = document.getElementById('preview-img');
-    const dropzoneText = document.getElementById('dropzone-text');
-    
-    let base64Image = null;
-
-    if (!overlay || !openBtn || !closeBtn || !form) return;
-
-    openBtn.addEventListener('click', () => overlay.classList.add('active'));
-
-    const closeModal = () => {
-        overlay.classList.remove('active');
-        resetForm();
-    };
-
-    closeBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeModal();
-    });
-
-    dropzone.addEventListener('click', () => fileInput.click());
-
-    fileInput.addEventListener('change', (e) => {
-        handleFile(e.target.files[0]);
-    });
-
-    dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.style.borderColor = 'var(--neon-cyan)';
-    });
-
-    dropzone.addEventListener('dragleave', () => {
-        dropzone.style.borderColor = 'rgba(255,255,255,0.1)';
-    });
-
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.style.borderColor = 'rgba(255,255,255,0.1)';
-        handleFile(e.dataTransfer.files[0]);
-    });
-
-    function handleFile(file) {
-        if (!file || !file.type.startsWith('image/')) {
-            alert("Please select a valid image file.");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            base64Image = e.target.result;
-            previewImg.src = base64Image;
-            previewContainer.style.display = 'block';
-            dropzoneText.style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function resetForm() {
-        form.reset();
-        base64Image = null;
-        previewContainer.style.display = 'none';
-        dropzoneText.style.display = 'block';
-        previewImg.src = '';
-    }
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!base64Image) {
-            alert("No image loaded. Please upload or drag an image first.");
-            return;
-        }
-
-        const title = document.getElementById('input-title').value;
-        const desc = document.getElementById('input-desc').value;
-
-        const newItem = {
-            category: currentCategory,
-            src: base64Image,
-            title: title,
-            desc: desc
-        };
-
-        try {
-            const id = await dbManager.addItem(newItem);
-            newItem.id = id;
-            
-            const grid = document.querySelector('.gallery-grid');
-            if (grid) {
-                const cardHTML = createCustomCardHTML(newItem);
-                grid.insertAdjacentHTML('beforeend', cardHTML);
-                rebuildGalleryItems();
-                updateItemCounter();
-            }
-
-            closeModal();
-        } catch (err) {
-            console.error("Failed to add custom item:", err);
-            alert("Error saving item to database. Try again.");
-        }
-    });
 }

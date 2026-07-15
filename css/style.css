@@ -1455,3 +1455,321 @@ header {
     stroke-width: 2.5;
 }
 
+/* Public Gallery Price Badge */
+.gallery-price {
+    font-family: var(--font-cyber);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--neon-green);
+    margin-top: 15px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gallery-price::before {
+    content: 'PRICE:';
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+/* Footer Admin Access Link */
+.footer-hud {
+    width: 100%;
+    text-align: center;
+    padding: 40px 0;
+    margin-top: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: var(--font-cyber);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-admin-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 1.5px;
+    transition: color var(--transition-fast);
+}
+
+.footer-admin-link:hover {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px var(--neon-cyan);
+}
+
+/* 
+========================================================================
+   ADMIN PANEL PAGE STYLING
+======================================================================== 
+*/
+
+/* Login Form Center Mode */
+.admin-login-container {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.login-card {
+    background: var(--bg-dark-panel);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    backdrop-filter: var(--glass-blur);
+    position: relative;
+}
+
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+}
+
+.login-title {
+    font-family: var(--font-cyber);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    color: var(--text-primary);
+}
+
+/* Admin Dashboard layout */
+.admin-header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.btn-logout {
+    font-family: var(--font-cyber);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--neon-magenta);
+    color: var(--neon-magenta);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-logout:hover {
+    background: var(--neon-magenta);
+    color: var(--text-primary);
+    box-shadow: 0 0 12px var(--neon-magenta);
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 1px;
+    margin-bottom: 40px;
+}
+
+.admin-tab-btn {
+    font-family: var(--font-cyber);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-muted);
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+}
+
+.admin-tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.admin-tab-btn.active {
+    color: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+}
+
+/* Management grid layout */
+.admin-manager-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1.8fr;
+    gap: 40px;
+    align-items: start;
+}
+
+@media (max-width: 992px) {
+    .admin-manager-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
+
+.admin-panel-card {
+    background: var(--bg-dark-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 30px;
+}
+
+.admin-panel-title {
+    font-family: var(--font-cyber);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px;
+    margin-bottom: 25px;
+    color: var(--text-secondary);
+}
+
+/* Management Table List */
+.admin-items-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-items-table th {
+    font-family: var(--font-cyber);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.admin-items-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.85rem;
+    vertical-align: middle;
+}
+
+.admin-thumb-container {
+    width: 60px;
+    height: 45px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--bg-dark-base);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.admin-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-item-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+}
+
+.admin-item-type-badge {
+    font-family: var(--font-cyber);
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.badge-static {
+    background: rgba(0, 240, 255, 0.08);
+    color: var(--neon-cyan);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+}
+
+.badge-custom {
+    background: rgba(189, 0, 255, 0.08);
+    color: var(--neon-purple);
+    border: 1px solid rgba(189, 0, 255, 0.15);
+}
+
+.badge-deleted {
+    background: rgba(255, 0, 127, 0.08);
+    color: var(--neon-magenta);
+    border: 1px solid rgba(255, 0, 127, 0.15);
+}
+
+.admin-price-val {
+    font-family: var(--font-cyber);
+    font-weight: 700;
+    color: var(--neon-green);
+}
+
+.btn-admin-action {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-admin-action:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+}
+
+.btn-admin-action.btn-delete {
+    border-color: rgba(255, 0, 127, 0.3);
+    color: var(--neon-magenta);
+}
+
+.btn-admin-action.btn-delete:hover {
+    background: var(--neon-magenta);
+    color: var(--text-primary);
+    box-shadow: 0 0 8px var(--neon-magenta);
+}
+
+.btn-admin-action.btn-restore {
+    border-color: rgba(0, 255, 136, 0.3);
+    color: var(--neon-green);
+}
+
+.btn-admin-action.btn-restore:hover {
+    background: var(--neon-green);
+    color: var(--bg-dark-base);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+
+.empty-state-text {
+    color: var(--text-muted);
+    text-align: center;
+    padding: 30px 0;
+    font-style: italic;
+}
+
+

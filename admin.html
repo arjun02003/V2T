@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V2T Groups | Admin Operations Center</title>
+    
+    <!-- Central Stylesheet -->
+    <link rel="stylesheet" href="css/style.css?v=1.3">
+</head>
+<body>
+
+    <!-- Particle Drift Layer -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Glowing Vector Spheres (Ambient Background Blur) -->
+    <div class="ambient-glows">
+        <div class="glow-orb glow-orb-cyan" style="top: 20%; left: -10%;"></div>
+        <div class="glow-orb glow-orb-magenta" style="bottom: 10%; right: -10%;"></div>
+    </div>
+
+    <!-- Header Operations HUD -->
+    <header>
+        <a href="index.html" class="logo-container" id="nav-logo">
+            <div class="logo-mark">
+                <div class="logo-triangle"></div>
+            </div>
+            <span class="logo-text">V2T Groups</span>
+        </a>
+        
+        <div class="header-hud">
+            <div class="hud-item">
+                <span class="status-indicator"></span>
+                <span>STATUS:</span>
+                <span class="value">SECURE_LINK</span>
+            </div>
+            <div class="hud-item">
+                <span>SECTOR:</span>
+                <span class="value" id="hud-sector-title">ADMINISTRATION</span>
+            </div>
+            <div class="hud-item">
+                <span>CONTACT:</span>
+                <a href="https://wa.me/917385094901" target="_blank" class="value" style="color: var(--neon-green); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 2px;"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    WhatsApp
+                </a>
+            </div>
+            <div class="admin-header-actions" id="admin-actions" style="display: none;">
+                <button class="btn-logout" id="btn-logout">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Primary Layout Container -->
+    <main class="container">
+        
+        <!-- LOGIN CARD INTERFACE -->
+        <section class="admin-login-container" id="login-container">
+            <div class="login-card">
+                <h2 class="login-title">Admin Access</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="login-username">Username</label>
+                        <input type="text" id="login-username" class="form-input" placeholder="Enter username" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <input type="password" id="login-password" class="form-input" placeholder="Enter password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn-submit-upload">Authorize</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ADMIN CORE DASHBOARD (Initially Hidden) -->
+        <section id="admin-dashboard" style="display: none;">
+            
+            <!-- Category Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" data-category="art">Art Gallery</button>
+                <button class="admin-tab-btn" data-category="event">Decoration (Events)</button>
+                <button class="admin-tab-btn" data-category="interior">Interior Design</button>
+            </div>
+
+            <!-- Management Panels -->
+            <div class="admin-manager-grid">
+                
+                <!-- Panel Left: Add New Item Form -->
+                <div class="admin-panel-card">
+                    <h3 class="admin-panel-title">Upload New Work</h3>
+                    <form id="admin-upload-form" onsubmit="return false;">
+                        <div class="form-group">
+                            <label class="form-label">Image File</label>
+                            <div class="file-dropzone" id="dropzone">
+                                <input type="file" id="input-file" accept="image/*" style="display: none;">
+                                <div class="dropzone-text" id="dropzone-text">
+                                    Drag & drop or <span>browse file</span>
+                                </div>
+                                <div class="preview-container" id="preview-container">
+                                    <img src="" alt="Upload preview" class="preview-img" id="preview-img">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="input-title">Title</label>
+                            <input type="text" id="input-title" class="form-input" placeholder="Enter title" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="input-price">Price</label>
+                            <input type="text" id="input-price" class="form-input" placeholder="e.g. ₹15,000 or $450" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="input-desc">Description</label>
+                            <textarea id="input-desc" class="form-input" rows="4" placeholder="Enter work descriptions..." required style="resize: none;"></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit-upload" id="btn-submit-upload">Add to Gallery</button>
+                    </form>
+                </div>
+
+                <!-- Panel Right: Manage Active Items -->
+                <div class="admin-panel-card">
+                    <h3 class="admin-panel-title">Manage Active Items</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="admin-items-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;">Image</th>
+                                    <th>Title & Details</th>
+                                    <th style="width: 100px;">Type</th>
+                                    <th style="width: 120px;">Price</th>
+                                    <th style="width: 110px; text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-items-list">
+                                <!-- Loaded dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Admin Panel Logic -->
+    <script>
+        // Static items definition to show in management tables
+        const staticItems = {
+            art: [
+                { id: "art-card-1", title: "Neurological Clay Reliefs", desc: "A set of four framed handcrafted clay relief designs featuring anatomical brains, stethoscopes, and cellular patterns.", price: "₹15,000", src: "images/art/art1.jpg" },
+                { id: "art-card-2", title: "Wellness Cardiology Relief", desc: "A dynamic clay nameplate sign for Wellness Heart Clinic, mapping an anatomical heart, pulses, and medical symbols.", price: "₹18,500", src: "images/art/art2.jpg" },
+                { id: "art-card-3", title: "Clinical Arts Collection", desc: "A quad-frame display showcasing specialized medical branch reliefs, including pediatric teddy bears and neurological pathways.", price: "₹14,000", src: "images/art/art3.jpg" },
+                { id: "art-card-4", title: "City Care Anatomy Relief", desc: "Dr. Chen's custom nameplate featuring high-detail clay reliefs of a biological heart, stethoscope, DNA helix, and leafy motifs.", price: "₹19,000", src: "images/art/art4.jpg" },
+                { id: "art-card-5", title: "Medical Science Reliefs", desc: "A quad-panel compilation detailing Pediatric, Neuroscience, Surgical, and Clinical care pathways in handcrafted clay.", price: "₹16,000", src: "images/art/art5.jpg" }
+            ],
+            event: [
+                { id: "event-card-1", title: "Peacock Leaf Floral Concept", desc: "High-end event staging featuring a stylized blue rose peacock frame flanked by magenta and deep blue palm leaf arrangements.", price: "₹25,000", src: "images/event/event1.jpg" },
+                { id: "event-card-2", title: "Grand Stage Backdrop Setup", desc: "Elegant reception stage backdrop designed with cascading purple and white flowers, warm fairy lights, and custom signage.", price: "₹35,000", src: "images/event/event2.jpg" },
+                { id: "event-card-3", title: "Peacock Rose Archway", desc: "A traditional heart-shaped red carnation backdrop with a majestic peacock sculpture wrapped in white roses and feathers.", price: "₹28,000", src: "images/event/event3.jpg" },
+                { id: "event-card-4", title: "Red Rose Canopy Stage", desc: "A gorgeous stage canopy setup featuring a circular red rose floral structure, hanging white jasmine garlands, and a red rose backdrop.", price: "₹30,000", src: "images/event/event4.jpg" },
+                { id: "event-card-5", title: "Peacock Feather Fan", desc: "An elaborate center-stage layout designed as a majestic peacock tail fan using white skeleton leaves and natural peacock feathers.", price: "₹15,000", src: "images/event/event5.jpg" },
+                { id: "event-card-6", title: "Rustic Peacock Arch", desc: "A botanical event archway made of dry branches, pampas grass, and blue orchids, detailed with hanging silver disco balls.", price: "₹22,000", src: "images/event/event6.jpg" }
+            ],
+            interior: [
+                { id: "interior-card-1", title: "Nordic Minimalist Salon", desc: "A light, airy living space integrating a soft grey linen sofa, solid oak barrel side tables, and natural potted plants.", price: "₹1,20,000", src: "images/interior/interior1.jpg" },
+                { id: "interior-card-2", title: "Grand Loft Living Room", desc: "A double-height modern penthouse featuring dark concrete panels, a massive stone fireplace mantle, and minimalist seating.", price: "₹3,50,000", src: "images/interior/interior2.jpg" },
+                { id: "interior-card-3", title: "Contemporary Dining Nook", desc: "A warm dining area framed by vertical wood slat screens, geometric circular wall ornaments, and smart drop lighting.", price: "₹95,000", src: "images/interior/interior3.jpg" },
+                { id: "interior-card-4", title: "Organic Live-Edge Lounge", desc: "A bespoke lounge featuring a large live-edge wood root panel integrated directly as wall shelving and glowing teardrop lamps.", price: "₹1,80,000", src: "images/interior/interior4.jpg" },
+                { id: "interior-card-5", title: "Bespoke Master Suite", desc: "An elegant master bedroom decorated with classic wall moldings, matching wood side stands, and warm organic paintings.", price: "₹2,20,000", src: "images/interior/interior5.jpg" }
+            ]
+        };
+
+        // IndexedDB Manager
+        class AdminDBManager {
+            constructor() {
+                this.dbName = 'v2t_groups_cms';
+                this.db = null;
+            }
+
+            init() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, 1);
+                    request.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('portfolio_items')) {
+                            const store = db.createObjectStore('portfolio_items', { keyPath: 'id', autoIncrement: true });
+                            store.createIndex('category', 'category', { unique: false });
+                        }
+                        if (!db.objectStoreNames.contains('deleted_static_items')) {
+                            db.createObjectStore('deleted_static_items', { keyPath: 'cardId' });
+                        }
+                    };
+                    request.onsuccess = (e) => {
+                        this.db = e.target.result;
+                        resolve();
+                    };
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            }
+
+            getCustomItems(category) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('portfolio_items', 'readonly');
+                    const store = transaction.objectStore('portfolio_items');
+                    const index = store.index('category');
+                    const request = index.getAll(category);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            addCustomItem(item) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('portfolio_items', 'readwrite');
+                    const store = transaction.objectStore('portfolio_items');
+                    const request = store.add(item);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            deleteCustomItem(id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('portfolio_items', 'readwrite');
+                    const store = transaction.objectStore('portfolio_items');
+                    const request = store.delete(id);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            getDeletedStaticIds() {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('deleted_static_items', 'readonly');
+                    const store = transaction.objectStore('deleted_static_items');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result.map(x => x.cardId));
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            hideStaticItem(cardId, category) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('deleted_static_items', 'readwrite');
+                    const store = transaction.objectStore('deleted_static_items');
+                    const request = store.put({ cardId, category });
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            restoreStaticItem(cardId) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('deleted_static_items', 'readwrite');
+                    const store = transaction.objectStore('deleted_static_items');
+                    const request = store.delete(cardId);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        }
+
+        const db = new AdminDBManager();
+        let currentTabCategory = 'art';
+
+        // Check Login state
+        const loginContainer = document.getElementById('login-container');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const adminActions = document.getElementById('admin-actions');
+        const hudSectorTitle = document.getElementById('hud-sector-title');
+        
+        function checkLogin() {
+            if (sessionStorage.getItem('v2t_admin_logged') === 'true') {
+                loginContainer.style.display = 'none';
+                adminDashboard.style.display = 'block';
+                adminActions.style.display = 'block';
+                hudSectorTitle.textContent = 'SECURE_DASHBOARD';
+                initDashboard();
+            } else {
+                loginContainer.style.display = 'flex';
+                adminDashboard.style.display = 'none';
+                adminActions.style.display = 'none';
+                hudSectorTitle.textContent = 'SECURE_LOGIN';
+            }
+        }
+
+        // Login Submit
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('login-username').value;
+            const pass = document.getElementById('login-password').value;
+
+            if (user === 'admin' && pass === 'v2tadmin@groups') {
+                sessionStorage.setItem('v2t_admin_logged', 'true');
+                checkLogin();
+            } else {
+                alert("Invalid Authorization Credentials.");
+            }
+        });
+
+        // Logout
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            sessionStorage.removeItem('v2t_admin_logged');
+            checkLogin();
+        });
+
+        // Initialize Dashboard
+        async function initDashboard() {
+            try {
+                await db.init();
+                setupTabs();
+                setupForm();
+                await renderItems();
+            } catch (err) {
+                console.error("Dashboard init failed:", err);
+            }
+        }
+
+        // Setup tabs
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.admin-tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', async (e) => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentTabCategory = tab.getAttribute('data-category');
+                    
+                    // Reset styling depending on category theme color
+                    updateThemeColors();
+                    
+                    await renderItems();
+                });
+            });
+        }
+
+        function updateThemeColors() {
+            const submitBtn = document.getElementById('btn-submit-upload');
+            if (currentTabCategory === 'art') {
+                submitBtn.style.background = 'linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))';
+            } else if (currentTabCategory === 'event') {
+                submitBtn.style.background = 'linear-gradient(90deg, var(--neon-magenta), var(--neon-purple))';
+            } else {
+                submitBtn.style.background = 'linear-gradient(90deg, var(--neon-green), var(--neon-cyan))';
+            }
+        }
+
+        // Render items list table
+        async function renderItems() {
+            const listTable = document.getElementById('admin-items-list');
+            listTable.innerHTML = '';
+
+            const staticList = staticItems[currentTabCategory];
+            const customList = await db.getCustomItems(currentTabCategory);
+            const deletedStaticIds = await db.getDeletedStaticIds();
+
+            // 1. Render Static Items
+            staticList.forEach(item => {
+                const isHidden = deletedStaticIds.includes(item.id);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="admin-thumb-container">
+                            <img src="${item.src}" alt="${item.title}" class="admin-thumb">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="admin-item-title">${item.title}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); max-width: 320px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                            ${item.desc}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="admin-item-type-badge ${isHidden ? 'badge-deleted' : 'badge-static'}">
+                            ${isHidden ? 'HIDDEN' : 'DEFAULT'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="admin-price-val">${item.price}</span>
+                    </td>
+                    <td style="text-align: right;">
+                        ${isHidden 
+                            ? `<button class="btn-admin-action btn-restore" onclick="restoreStatic('${item.id}')">Show</button>` 
+                            : `<button class="btn-admin-action btn-delete" onclick="hideStatic('${item.id}')">Hide</button>`
+                        }
+                    </td>
+                `;
+                listTable.appendChild(tr);
+            });
+
+            // 2. Render Custom Items
+            customList.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="admin-thumb-container">
+                            <img src="${item.src}" alt="${item.title}" class="admin-thumb">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="admin-item-title">${item.title}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); max-width: 320px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                            ${item.desc}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="admin-item-type-badge badge-custom">UPLOADED</span>
+                    </td>
+                    <td>
+                        <span class="admin-price-val">${item.price}</span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button class="btn-admin-action btn-delete" onclick="deleteCustom(${item.id})">Delete</button>
+                    </td>
+                `;
+                listTable.appendChild(tr);
+            });
+
+            if (staticList.length === 0 && customList.length === 0) {
+                listTable.innerHTML = `<tr><td colspan="5" class="empty-state-text">No items active in this sector.</td></tr>`;
+            }
+        }
+
+        // Actions: Hide static
+        window.hideStatic = async function(cardId) {
+            if (confirm("Are you sure you want to hide this default card from the public gallery?")) {
+                await db.hideStaticItem(cardId, currentTabCategory);
+                await renderItems();
+            }
+        };
+
+        // Actions: Restore static
+        window.restoreStatic = async function(cardId) {
+            await db.restoreStaticItem(cardId);
+            await renderItems();
+        };
+
+        // Actions: Delete custom
+        window.deleteCustom = async function(id) {
+            if (confirm("Are you sure you want to permanently delete this uploaded item?")) {
+                await db.deleteCustomItem(id);
+                await renderItems();
+            }
+        };
+
+        // Setup Form Upload
+        function setupForm() {
+            const form = document.getElementById('admin-upload-form');
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('input-file');
+            const previewContainer = document.getElementById('preview-container');
+            const previewImg = document.getElementById('preview-img');
+            const dropzoneText = document.getElementById('dropzone-text');
+            
+            let base64Image = null;
+
+            if (!dropzone || !fileInput || !form) return;
+
+            dropzone.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', (e) => {
+                handleFile(e.target.files[0]);
+            });
+
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--neon-cyan)';
+            });
+
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.style.borderColor = 'rgba(255,255,255,0.1)';
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'rgba(255,255,255,0.1)';
+                handleFile(e.dataTransfer.files[0]);
+            });
+
+            function handleFile(file) {
+                if (!file || !file.type.startsWith('image/')) {
+                    alert("Please select a valid image file.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    base64Image = e.target.result;
+                    previewImg.src = base64Image;
+                    previewContainer.style.display = 'block';
+                    dropzoneText.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function resetForm() {
+                form.reset();
+                base64Image = null;
+                previewContainer.style.display = 'none';
+                dropzoneText.style.display = 'block';
+                previewImg.src = '';
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!base64Image) {
+                    alert("Please upload or drag an image first.");
+                    return;
+                }
+
+                const title = document.getElementById('input-title').value;
+                const price = document.getElementById('input-price').value;
+                const desc = document.getElementById('input-desc').value;
+
+                const newItem = {
+                    category: currentTabCategory,
+                    src: base64Image,
+                    title: title,
+                    price: price,
+                    desc: desc
+                };
+
+                try {
+                    await db.addCustomItem(newItem);
+                    resetForm();
+                    await renderItems();
+                    alert("Successfully added to gallery!");
+                } catch (err) {
+                    console.error("Failed to add custom item:", err);
+                    alert("Error saving item. Try again.");
+                }
+            });
+        }
+
+        // Initialize page login checks
+        checkLogin();
+    </script>
+
+    <!-- Canvas background & interactions script -->
+    <script src="js/main.js?v=1.3"></script>
+</body>
+</html>
