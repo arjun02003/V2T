@@ -287,7 +287,7 @@ class DBManager {
 
     init() {
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open(this.dbName, 1);
+            const request = indexedDB.open(this.dbName, 2); // Upgraded to v2 to match schema migration
             request.onupgradeneeded = (e) => {
                 const db = e.target.result;
                 if (!db.objectStoreNames.contains('portfolio_items')) {
