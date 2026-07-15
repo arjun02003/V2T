@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V2T Groups | Event Management Portal</title>
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="Explore V2T Groups Event Management Division. View images of our high-tech galas, product launches, and summits with our premium responsive lightbox preview.">
+    <meta name="keywords" content="V2T Groups, Event Management, Production Showcase, Corporate Galas, Live Summits">
+    
+    <!-- Central Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="gallery-event">
+
+    <!-- Particle Drift Layer -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Glowing Vector Spheres (Ambient Background Blur) -->
+    <div class="ambient-glows">
+        <div class="glow-orb glow-orb-magenta" style="top: -10%; left: 30%;"></div>
+        <div class="glow-orb glow-orb-cyan" style="bottom: 10%; right: 20%;"></div>
+    </div>
+
+    <!-- Header Operations HUD -->
+    <header>
+        <a href="index.html" class="logo-container" id="nav-logo">
+            <div class="logo-mark">
+                <div class="logo-triangle"></div>
+            </div>
+            <span class="logo-text">V2T Groups</span>
+        </a>
+        
+        <div class="header-hud">
+            <div class="hud-item">
+                <span class="status-indicator"></span>
+                <span>STATUS:</span>
+                <span class="value">ONLINE</span>
+            </div>
+            <div class="hud-item">
+                <span>VERSION:</span>
+                <span class="value">V2T-CORE v2.8</span>
+            </div>
+            <div class="hud-item">
+                <span>SECTOR:</span>
+                <span class="value">EVENT PORTAL</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Primary Layout Container -->
+    <main class="container">
+        
+        <!-- Back Navigation Button -->
+        <div class="nav-back-container">
+            <a href="index.html" class="btn-back" id="btn-back-home">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Return to Dashboard</span>
+            </a>
+        </div>
+
+        <!-- Section Title -->
+        <section class="hero-section">
+            <p class="hero-subtitle">Operational Sector // 02</p>
+            <h1 class="hero-title">Event Management</h1>
+            <p class="hero-desc">
+                Designing experiences that live in memory. Examine our technical execution setups, stage designs, and ambient coordination for global summits and luxury campaigns.
+            </p>
+        </section>
+
+        <!-- Gallery Operations HUD Info -->
+        <div class="gallery-header-hud">
+            <div>DB_SECTOR: EVENTS // ACTIVE_ITEMS: 06</div>
+            <div>STATUS: DISPLAYING_PORTFOLIO</div>
+        </div>
+
+        <!-- Responsive Gallery Grid -->
+        <section class="gallery-grid">
+
+            <!-- Item 1 -->
+            <div class="gallery-card" id="event-card-1">
+                <div class="gallery-img-container">
+                    <img src="images/event/event1.jpg" alt="Peacock Leaf Floral Concept" class="gallery-img" loading="lazy">
+                </div>
+                <div class="gallery-info">
+                    <div>
+                        <span class="gallery-meta">SYS.EVT // 01</span>
+                        <h3 class="gallery-card-title">Peacock Leaf Floral Concept</h3>
+                        <p class="gallery-card-desc">
+                            High-end event staging featuring a styled blue rose peacock frame flanked by magenta and deep blue palm leaf arrangements.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="gallery-card" id="event-card-2">
+                <div class="gallery-img-container">
+                    <img src="images/event/event2.jpg" alt="Grand Stage Backdrop Setup" class="gallery-img" loading="lazy">
+                </div>
+                <div class="gallery-info">
+                    <div>
+                        <span class="gallery-meta">SYS.EVT // 02</span>
+                        <h3 class="gallery-card-title">Grand Stage Backdrop Setup</h3>
+                        <p class="gallery-card-desc">
+                            Elegant reception stage backdrop designed with cascading purple and white flowers, warm fairy lights, and custom signage.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="gallery-card" id="event-card-3">
+                <div class="gallery-img-container">
+                    <img src="images/event/event3.jpg" alt="Peacock Rose Archway" class="gallery-img" loading="lazy">
+                </div>
+                <div class="gallery-info">
+                    <div>
+                        <span class="gallery-meta">SYS.EVT // 03</span>
+                        <h3 class="gallery-card-title">Peacock Rose Archway</h3>
+                        <p class="gallery-card-desc">
+                            A traditional heart-shaped red carnation backdrop with a majestic peacock sculpture wrapped in white roses and feathers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="gallery-card" id="event-card-4">
+                <div class="gallery-img-container">
+                    <img src="images/event/event4.jpg" alt="Red Rose Canopy Stage" class="gallery-img" loading="lazy">
+                </div>
+                <div class="gallery-info">
+                    <div>
+                        <span class="gallery-meta">SYS.EVT // 04</span>
+                        <h3 class="gallery-card-title">Red Rose Canopy Stage</h3>
+                        <p class="gallery-card-desc">
+                            A gorgeous stage canopy setup featuring a circular red rose floral structure, hanging white jasmine garlands, and a red rose backdrop.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="gallery-card" id="event-card-5">
+                <div class="gallery-img-container">
+                    <img src="images/event/event5.jpg" alt="Peacock Feather Fan" class="gallery-img" loading="lazy">
+                </div>
+                <div class="gallery-info">
+                    <div>
+                        <span class="gallery-meta">SYS.EVT // 05</span>
+                        <h3 class="gallery-card-title">Peacock Feather Fan</h3>
+                        <p class="gallery-card-desc">
+                            An elaborate center-stage layout designed as a majestic peacock tail fan using white skeleton leaves and natural peacock feathers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 6 -->
+            <div class="gallery-card" id="event-card-6">
+                <div class="gallery-img-container">
+                    <img src="images/event/event6.jpg" alt="Rustic Peacock Arch" class="gallery-img" loading="lazy">
+                </div>
+                <div class="gallery-info">
+                    <div>
+                        <span class="gallery-meta">SYS.EVT // 06</span>
+                        <h3 class="gallery-card-title">Rustic Peacock Arch</h3>
+                        <p class="gallery-card-desc">
+                            A botanical event archway made of dry branches, pampas grass, and blue orchids, detailed with hanging silver disco balls.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Fullscreen Interactive Lightbox Modal -->
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+        <div class="lightbox-frame"></div>
+        
+        <!-- Controls -->
+        <button class="lightbox-control lightbox-close" aria-label="Close Lightbox" id="lightbox-btn-close">
+            <svg viewBox="0 0 24 24">
+                <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button class="lightbox-control lightbox-prev" aria-label="Previous image" id="lightbox-btn-prev">
+            <svg viewBox="0 0 24 24">
+                <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button class="lightbox-control lightbox-next" aria-label="Next image" id="lightbox-btn-next">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <!-- Image Wrapper -->
+        <div class="lightbox-content-wrapper">
+            <img src="" alt="Fullscreen image display" class="lightbox-img">
+        </div>
+
+        <!-- Text Overlay Panel -->
+        <div class="lightbox-caption-panel">
+            <h3 class="lightbox-title">Image Title</h3>
+            <p class="lightbox-desc">Detailed descriptions appear here.</p>
+            <span class="lightbox-counter">IMAGE -- OF --</span>
+        </div>
+    </div>
+
+    <!-- Central Script Link -->
+    <script src="js/main.js"></script>
+</body>
+</html>

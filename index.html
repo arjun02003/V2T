@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V2T Groups | Futuristic Operations Dashboard</title>
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="Welcome to V2T Groups. Access our futuristic dashboard showcase featuring our core divisions: Art, Event Management, and Interior Design.">
+    <meta name="keywords" content="V2T Groups, Art, Event Management, Interior Design, Premium Website, Portfolio Dashboard">
+    
+    <!-- Central Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Particle Drift Layer -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Glowing Vector Spheres (Ambient Background Blur) -->
+    <div class="ambient-glows">
+        <div class="glow-orb glow-orb-cyan"></div>
+        <div class="glow-orb glow-orb-magenta"></div>
+        <div class="glow-orb glow-orb-purple"></div>
+    </div>
+
+    <!-- Header Operations HUD -->
+    <header>
+        <a href="index.html" class="logo-container" id="nav-logo">
+            <div class="logo-mark">
+                <div class="logo-triangle"></div>
+            </div>
+            <span class="logo-text">V2T Groups</span>
+        </a>
+        
+        <!-- Tech HUD status bar -->
+        <div class="header-hud">
+            <div class="hud-item">
+                <span class="status-indicator"></span>
+                <span>STATUS:</span>
+                <span class="value">ONLINE</span>
+            </div>
+            <div class="hud-item">
+                <span>VERSION:</span>
+                <span class="value">V2T-CORE v2.8</span>
+            </div>
+            <div class="hud-item">
+                <span>SECTOR:</span>
+                <span class="value">DASHBOARD</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Primary Layout Container -->
+    <main class="container">
+        
+        <!-- Hero Introduction -->
+        <section class="hero-section">
+            <p class="hero-subtitle">Multidisciplinary Solutions</p>
+            <h1 class="hero-title">V2T Groups</h1>
+            <p class="hero-desc">
+                Welcome to the operational hub of V2T Groups. Select a portal below to explore our high-end galleries bridging physical execution and digital art design.
+            </p>
+        </section>
+
+        <!-- Glass Dashboard Panel -->
+        <section class="dashboard-container">
+            <div class="dashboard-hud-header">
+                <div class="hud-title">ACTIVE SECTORS</div>
+                <div class="hud-system-time" id="system-time">SYSTEM TIME: --:--:-- LCL</div>
+            </div>
+
+            <!-- Grid of 3D Hover Cards -->
+            <div class="dashboard-grid">
+
+                <!-- CARD 1: ART -->
+                <div class="card-wrapper">
+                    <a href="art.html" class="card-3d" id="card-art">
+                        <div class="card-header-tech">
+                            <span class="tech-code">SYS.SEC // 01</span>
+                            <span class="tech-badge">Art Portal</span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="card-icon-box">
+                                <!-- Art Palette Vector Icon -->
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.03345 19.1749 5.29525 19.2274 5.52243 19.1332C5.74961 19.039 5.90327 18.8143 5.91238 18.5684C5.95259 17.478 6.41724 16.4447 7.2144 15.6476C8.01156 14.8504 9.04489 14.3857 10.1353 14.3455C10.4287 14.3347 10.6667 14.1 10.6667 13.8063C10.6667 13.5126 10.4287 13.2779 10.1353 13.2671C8.24357 13.1979 6.45265 12.3995 5.09348 11.0403C3.73431 9.68117 2.93589 7.89025 2.86675 5.99853C2.85592 5.70512 2.62128 5.46712 2.32753 5.46712" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="7.5" cy="10.5" r="1.5" />
+                                    <circle cx="11.5" cy="7.5" r="1.5" />
+                                    <circle cx="16.5" cy="9.5" r="1.5" />
+                                    <circle cx="15.5" cy="14.5" r="1.5" />
+                                </svg>
+                            </div>
+                            <h2 class="card-title">Art</h2>
+                            <p class="card-desc">
+                                Exploring the boundaries of fine art and digital illustration. A showcase of visual masterpieces engineered to inspire and challenge conventional perspectives.
+                            </p>
+                        </div>
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-val">24+</span>
+                                <span class="stat-lbl">COLLECTIONS</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-val">FINE / DIG</span>
+                                <span class="stat-lbl">CATEGORY</span>
+                            </div>
+                        </div>
+
+                        <div class="card-action-btn">
+                            <span>Open Portal</span>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- CARD 2: EVENT MANAGEMENT -->
+                <div class="card-wrapper">
+                    <a href="event.html" class="card-3d" id="card-event">
+                        <div class="card-header-tech">
+                            <span class="tech-code">SYS.SEC // 02</span>
+                            <span class="tech-badge">Event Portal</span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="card-icon-box">
+                                <!-- Stage spotlight / Event Ticket Vector Icon -->
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 17L12 22L22 17" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h2 class="card-title">Event Management</h2>
+                            <p class="card-desc">
+                                Designing immersive physical experiences. From technological keynotes to luxury product launches, we curate and choreograph every visual detail with precision.
+                            </p>
+                        </div>
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-val">150+</span>
+                                <span class="stat-lbl">EVENTS HELD</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-val">99.8%</span>
+                                <span class="stat-lbl">SATISFACTION</span>
+                            </div>
+                        </div>
+
+                        <div class="card-action-btn">
+                            <span>Open Portal</span>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- CARD 3: INTERIOR DESIGN -->
+                <div class="card-wrapper">
+                    <a href="interior.html" class="card-3d" id="card-interior">
+                        <div class="card-header-tech">
+                            <span class="tech-code">SYS.SEC // 03</span>
+                            <span class="tech-badge">Design Portal</span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="card-icon-box">
+                                <!-- Architectural Grid Cube Vector Icon -->
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h2 class="card-title">Interior Design</h2>
+                            <p class="card-desc">
+                                Redefining the spaces you inhabit. Merging cyber-luxe aesthetics, organic layouts, and ergonomic spatial planning to build premium functional environments.
+                            </p>
+                        </div>
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-val">85+</span>
+                                <span class="stat-lbl">SPACES BUILT</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-val">10+</span>
+                                <span class="stat-lbl">AWARDS WON</span>
+                            </div>
+                        </div>
+
+                        <div class="card-action-btn">
+                            <span>Open Portal</span>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Central Script Link -->
+    <script src="js/main.js"></script>
+</body>
+</html>
