@@ -292,15 +292,20 @@ class DBManager {
             // Check if Firebase config is set up
             if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.databaseURL) {
                 try {
-                    window.firebase.initializeApp(window.FIREBASE_CONFIG);
+                    // Guard: prevent "app already exists" error on re-init
+                    if (!window.firebase.apps.length) {
+                        window.firebase.initializeApp(window.FIREBASE_CONFIG);
+                    }
                     this.dbRef = window.firebase.database().ref();
                     this.useFirebase = true;
-                    console.log("Firebase Realtime Cloud Database initialized successfully.");
+                    console.log('%c[V2T] Firebase Realtime DB connected ✅', 'color: #00f0ff; font-weight: bold;');
                     resolve();
                     return;
                 } catch (e) {
-                    console.error("Failed to initialize Firebase client. Falling back to IndexedDB.", e);
+                    console.error("[V2T] Firebase init failed, falling back to IndexedDB:", e);
                 }
+            } else {
+                console.warn("[V2T] No Firebase config found — using local IndexedDB.");
             }
 
             const request = indexedDB.open(this.dbName, 3); // Upgraded to v3 to support price overrides
