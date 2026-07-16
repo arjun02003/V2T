@@ -283,10 +283,25 @@ class DBManager {
     constructor() {
         this.dbName = 'v2t_groups_cms';
         this.db = null;
+        this.supabase = null;
+        this.useSupabase = false;
     }
 
     init() {
         return new Promise((resolve, reject) => {
+            // Check if Supabase config is set up
+            if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+                try {
+                    this.supabase = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+                    this.useSupabase = true;
+                    console.log("Supabase Cloud Database initialized successfully.");
+                    resolve();
+                    return;
+                } catch (e) {
+                    console.error("Failed to initialize Supabase client. Falling back to IndexedDB.", e);
+                }
+            }
+
             const request = indexedDB.open(this.dbName, 3); // Upgraded to v3 to support price overrides
             request.onblocked = () => {
                 console.warn("Database upgrade blocked by another open tab.");
@@ -317,6 +332,31 @@ class DBManager {
     }
 
     getItems(category) {
+        if (this.useSupabase) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('portfolio_items')
+                        .select('*')
+                        .eq('category', category)
+                        .order('id', { ascending: true });
+                    if (error) throw error;
+                    // Format response columns to match expected fields: image_url -> src
+                    const formatted = data.map(item => ({
+                        id: item.id,
+                        category: item.category,
+                        src: item.image_url,
+                        title: item.title,
+                        desc: item.desc_text,
+                        price: item.price
+                    }));
+                    resolve(formatted);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction('portfolio_items', 'readonly');
             const store = transaction.objectStore('portfolio_items');
@@ -328,6 +368,20 @@ class DBManager {
     }
 
     getDeletedStaticIds() {
+        if (this.useSupabase) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('deleted_static_items')
+                        .select('card_id');
+                    if (error) throw error;
+                    resolve(data.map(x => x.card_id));
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction('deleted_static_items', 'readonly');
             const store = transaction.objectStore('deleted_static_items');
@@ -338,6 +392,25 @@ class DBManager {
     }
 
     getOverriddenPrices() {
+        if (this.useSupabase) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('overridden_prices')
+                        .select('*');
+                    if (error) throw error;
+                    // Format to match expected fields: item_id -> itemId
+                    const formatted = data.map(x => ({
+                        itemId: x.item_id,
+                        price: x.price
+                    }));
+                    resolve(formatted);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
         return new Promise((resolve, reject) => {
             if (!this.db.objectStoreNames.contains('overridden_prices')) {
                 resolve([]);
