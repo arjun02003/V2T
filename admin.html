@@ -6,13 +6,13 @@
     <title>V2T Groups | Admin Operations Center</title>
     
     <!-- Central Stylesheet -->
-    <link rel="stylesheet" href="css/style.css?v=1.4">
+    <link rel="stylesheet" href="css/style.css?v=1.5">
 
     <!-- Firebase CDN & Config (loaded in head so inline scripts can use it) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=1.4"></script>
+    <script src="js/firebase-config.js?v=1.5"></script>
 </head>
 <body>
 
@@ -696,15 +696,39 @@
                     alert("Please select a valid image file.");
                     return;
                 }
-                // Save the raw file object for Firebase Storage upload
-                selectedFile = file;
 
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    base64Image = e.target.result;
-                    previewImg.src = base64Image;
-                    previewContainer.style.display = 'block';
-                    dropzoneText.style.display = 'none';
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Limit maximum dimension to 800px for optimal performance and size
+                        const maxDim = 800;
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to JPEG format at 0.75 quality (highly optimized base64)
+                        base64Image = canvas.toDataURL('image/jpeg', 0.75);
+                        previewImg.src = base64Image;
+                        previewContainer.style.display = 'block';
+                        dropzoneText.style.display = 'none';
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
@@ -731,19 +755,12 @@
 
                 const submitBtn = document.getElementById('btn-submit-upload');
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Uploading...';
+                submitBtn.textContent = 'Saving...';
 
                 try {
-                    let imageSrc = base64Image;
-
-                    // If Firebase is active, upload image to Firebase Storage first
-                    if (db.useFirebase && selectedFile) {
-                        imageSrc = await db.uploadToStorage(selectedFile);
-                    }
-
                     const newItem = {
                         category: currentTabCategory,
-                        src: imageSrc,
+                        src: base64Image, // Storing highly compressed base64 directly
                         title: title,
                         price: price,
                         desc: desc
@@ -767,6 +784,6 @@
         checkLogin();
     </script>
     <!-- Canvas background & interactions script -->
-    <script src="js/main.js?v=1.4"></script>
+    <script src="js/main.js?v=1.5"></script>
 </body>
 </html>
