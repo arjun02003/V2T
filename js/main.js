@@ -283,22 +283,23 @@ class DBManager {
     constructor() {
         this.dbName = 'v2t_groups_cms';
         this.db = null;
-        this.supabase = null;
-        this.useSupabase = false;
+        this.dbRef = null;
+        this.useFirebase = false;
     }
 
     init() {
         return new Promise((resolve, reject) => {
-            // Check if Supabase config is set up
-            if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+            // Check if Firebase config is set up
+            if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.databaseURL) {
                 try {
-                    this.supabase = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
-                    this.useSupabase = true;
-                    console.log("Supabase Cloud Database initialized successfully.");
+                    window.firebase.initializeApp(window.FIREBASE_CONFIG);
+                    this.dbRef = window.firebase.database().ref();
+                    this.useFirebase = true;
+                    console.log("Firebase Realtime Cloud Database initialized successfully.");
                     resolve();
                     return;
                 } catch (e) {
-                    console.error("Failed to initialize Supabase client. Falling back to IndexedDB.", e);
+                    console.error("Failed to initialize Firebase client. Falling back to IndexedDB.", e);
                 }
             }
 
@@ -332,28 +333,20 @@ class DBManager {
     }
 
     getItems(category) {
-        if (this.useSupabase) {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    const { data, error } = await this.supabase
-                        .from('portfolio_items')
-                        .select('*')
-                        .eq('category', category)
-                        .order('id', { ascending: true });
-                    if (error) throw error;
-                    // Format response columns to match expected fields: image_url -> src
-                    const formatted = data.map(item => ({
-                        id: item.id,
-                        category: item.category,
-                        src: item.image_url,
-                        title: item.title,
-                        desc: item.desc_text,
-                        price: item.price
-                    }));
-                    resolve(formatted);
-                } catch (err) {
-                    reject(err);
-                }
+        if (this.useFirebase) {
+            return new Promise((resolve, reject) => {
+                this.dbRef.child('portfolio_items').once('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (!val) {
+                        resolve([]);
+                        return;
+                    }
+                    const items = Object.keys(val).map(key => ({
+                        id: key,
+                        ...val[key]
+                    })).filter(x => x.category === category);
+                    resolve(items);
+                }, reject);
             });
         }
 
@@ -368,17 +361,16 @@ class DBManager {
     }
 
     getDeletedStaticIds() {
-        if (this.useSupabase) {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    const { data, error } = await this.supabase
-                        .from('deleted_static_items')
-                        .select('card_id');
-                    if (error) throw error;
-                    resolve(data.map(x => x.card_id));
-                } catch (err) {
-                    reject(err);
-                }
+        if (this.useFirebase) {
+            return new Promise((resolve, reject) => {
+                this.dbRef.child('deleted_static_items').once('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (!val) {
+                        resolve([]);
+                        return;
+                    }
+                    resolve(Object.keys(val));
+                }, reject);
             });
         }
 
@@ -392,22 +384,20 @@ class DBManager {
     }
 
     getOverriddenPrices() {
-        if (this.useSupabase) {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    const { data, error } = await this.supabase
-                        .from('overridden_prices')
-                        .select('*');
-                    if (error) throw error;
-                    // Format to match expected fields: item_id -> itemId
-                    const formatted = data.map(x => ({
-                        itemId: x.item_id,
-                        price: x.price
+        if (this.useFirebase) {
+            return new Promise((resolve, reject) => {
+                this.dbRef.child('overridden_prices').once('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (!val) {
+                        resolve([]);
+                        return;
+                    }
+                    const list = Object.keys(val).map(key => ({
+                        itemId: key,
+                        price: val[key]
                     }));
-                    resolve(formatted);
-                } catch (err) {
-                    reject(err);
-                }
+                    resolve(list);
+                }, reject);
             });
         }
 

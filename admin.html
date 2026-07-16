@@ -173,27 +173,28 @@
             ]
         };
 
-        // IndexedDB / Supabase Hybrid Manager
+        // IndexedDB / Firebase Hybrid Manager
         class AdminDBManager {
             constructor() {
                 this.dbName = 'v2t_groups_cms';
                 this.db = null;
-                this.supabase = null;
-                this.useSupabase = false;
+                this.dbRef = null;
+                this.useFirebase = false;
             }
 
             init() {
                 return new Promise((resolve, reject) => {
-                    // Check if Supabase config is set up
-                    if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+                    // Check if Firebase config is set up
+                    if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.databaseURL) {
                         try {
-                            this.supabase = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
-                            this.useSupabase = true;
-                            console.log("Admin Supabase Cloud Database initialized successfully.");
+                            window.firebase.initializeApp(window.FIREBASE_CONFIG);
+                            this.dbRef = window.firebase.database().ref();
+                            this.useFirebase = true;
+                            console.log("Admin Firebase Cloud Database initialized successfully.");
                             resolve();
                             return;
                         } catch (e) {
-                            console.error("Failed to initialize Supabase client. Falling back to IndexedDB.", e);
+                            console.error("Failed to initialize Firebase client. Falling back to IndexedDB.", e);
                         }
                     }
 
@@ -228,27 +229,20 @@
             }
 
             getCustomItems(category) {
-                if (this.useSupabase) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const { data, error } = await this.supabase
-                                .from('portfolio_items')
-                                .select('*')
-                                .eq('category', category)
-                                .order('id', { ascending: true });
-                            if (error) throw error;
-                            const formatted = data.map(item => ({
-                                id: item.id,
-                                category: item.category,
-                                src: item.image_url,
-                                title: item.title,
-                                desc: item.desc_text,
-                                price: item.price
-                            }));
-                            resolve(formatted);
-                        } catch (err) {
-                            reject(err);
-                        }
+                if (this.useFirebase) {
+                    return new Promise((resolve, reject) => {
+                        this.dbRef.child('portfolio_items').once('value', (snapshot) => {
+                            const val = snapshot.val();
+                            if (!val) {
+                                resolve([]);
+                                return;
+                            }
+                            const items = Object.keys(val).map(key => ({
+                                id: key,
+                                ...val[key]
+                            })).filter(x => x.category === category);
+                            resolve(items);
+                        }, reject);
                     });
                 }
 
@@ -263,24 +257,19 @@
             }
 
             addCustomItem(item) {
-                if (this.useSupabase) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const { data, error } = await this.supabase
-                                .from('portfolio_items')
-                                .insert([{
-                                    category: item.category,
-                                    image_url: item.src,
-                                    title: item.title,
-                                    desc_text: item.desc,
-                                    price: item.price
-                                }])
-                                .select();
-                            if (error) throw error;
-                            resolve(data[0].id);
-                        } catch (err) {
-                            reject(err);
-                        }
+                if (this.useFirebase) {
+                    return new Promise((resolve, reject) => {
+                        const newRef = this.dbRef.child('portfolio_items').push();
+                        newRef.set({
+                            category: item.category,
+                            src: item.src,
+                            title: item.title,
+                            desc: item.desc,
+                            price: item.price
+                        }, (err) => {
+                            if (err) reject(err);
+                            else resolve(newRef.key);
+                        });
                     });
                 }
 
@@ -294,18 +283,12 @@
             }
 
             deleteCustomItem(id) {
-                if (this.useSupabase) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const { error } = await this.supabase
-                                .from('portfolio_items')
-                                .delete()
-                                .eq('id', id);
-                            if (error) throw error;
-                            resolve();
-                        } catch (err) {
-                            reject(err);
-                        }
+                if (this.useFirebase) {
+                    return new Promise((resolve, reject) => {
+                        this.dbRef.child(`portfolio_items/${id}`).remove((err) => {
+                            if (err) reject(err);
+                            else resolve();
+                        });
                     });
                 }
 
@@ -319,17 +302,16 @@
             }
 
             getDeletedStaticIds() {
-                if (this.useSupabase) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const { data, error } = await this.supabase
-                                .from('deleted_static_items')
-                                .select('card_id');
-                            if (error) throw error;
-                            resolve(data.map(x => x.card_id));
-                        } catch (err) {
-                            reject(err);
-                        }
+                if (this.useFirebase) {
+                    return new Promise((resolve, reject) => {
+                        this.dbRef.child('deleted_static_items').once('value', (snapshot) => {
+                            const val = snapshot.val();
+                            if (!val) {
+                                resolve([]);
+                                return;
+                            }
+                            resolve(Object.keys(val));
+                        }, reject);
                     });
                 }
 
@@ -343,17 +325,12 @@
             }
 
             hideStaticItem(cardId, category) {
-                if (this.useSupabase) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const { error } = await this.supabase
-                                .from('deleted_static_items')
-                                .upsert({ card_id: cardId, category: category });
-                            if (error) throw error;
-                            resolve();
-                        } catch (err) {
-                            reject(err);
-                        }
+                if (this.useFirebase) {
+                    return new Promise((resolve, reject) => {
+                        this.dbRef.child(`deleted_static_items/${cardId}`).set(category, (err) => {
+                            if (err) reject(err);
+                            else resolve();
+                        });
                     });
                 }
 
@@ -367,18 +344,11 @@
             }
 
             restoreStaticItem(cardId) {
-                if (this.useSupabase) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const p1 = this.supabase.from('deleted_static_items').delete().eq('card_id', cardId);
-                            const p2 = this.supabase.from('overridden_prices').delete().eq('item_id', cardId);
-                            const [r1, r2] = await Promise.all([p1, p2]);
-                            if (r1.error) throw r1.error;
-                            if (r2.error) throw r2.error;
-                            resolve();
-                        } catch (err) {
-                            reject(err);
-                        }
+                if (this.useFirebase) {
+                    return new Promise((resolve, reject) => {
+                        const p1 = this.dbRef.child(`deleted_static_items/${cardId}`).remove();
+                        const p2 = this.dbRef.child(`overridden_prices/${cardId}`).remove();
+                        Promise.all([p1, p2]).then(() => resolve(), reject);
                     });
                 }
 
@@ -392,21 +362,20 @@
             }
 
             getOverriddenPrices() {
-                if (this.useSupabase) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const { data, error } = await this.supabase
-                                .from('overridden_prices')
-                                .select('*');
-                            if (error) throw error;
-                            const formatted = data.map(x => ({
-                                itemId: x.item_id,
-                                price: x.price
+                if (this.useFirebase) {
+                    return new Promise((resolve, reject) => {
+                        this.dbRef.child('overridden_prices').once('value', (snapshot) => {
+                            const val = snapshot.val();
+                            if (!val) {
+                                resolve([]);
+                                return;
+                            }
+                            const list = Object.keys(val).map(key => ({
+                                itemId: key,
+                                price: val[key]
                             }));
-                            resolve(formatted);
-                        } catch (err) {
-                            reject(err);
-                        }
+                            resolve(list);
+                        }, reject);
                     });
                 }
 
@@ -420,17 +389,12 @@
             }
 
             savePriceOverride(itemId, price) {
-                if (this.useSupabase) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const { error } = await this.supabase
-                                .from('overridden_prices')
-                                .upsert({ item_id: itemId, price: price });
-                            if (error) throw error;
-                            resolve();
-                        } catch (err) {
-                            reject(err);
-                        }
+                if (this.useFirebase) {
+                    return new Promise((resolve, reject) => {
+                        this.dbRef.child(`overridden_prices/${itemId}`).set(price, (err) => {
+                            if (err) reject(err);
+                            else resolve();
+                        });
                     });
                 }
 
@@ -609,7 +573,7 @@
                         </div>
                     </td>
                     <td style="text-align: right;">
-                        <button class="btn-admin-action btn-delete" onclick="deleteCustom(${item.id})">Delete</button>
+                        <button class="btn-admin-action btn-delete" onclick="deleteCustom('${item.id}')">Delete</button>
                     </td>
                 `;
                 listTable.appendChild(tr);
@@ -752,9 +716,10 @@
         checkLogin();
     </script>
 
-    <!-- Supabase CDN & Config -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-config.js?v=1.3"></script>
+    <!-- Firebase CDN & Config -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js?v=1.3"></script>
     <!-- Canvas background & interactions script -->
     <script src="js/main.js?v=1.3"></script>
 </body>
