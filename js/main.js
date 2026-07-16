@@ -298,8 +298,26 @@ class DBManager {
                     }
                     this.dbRef = window.firebase.database().ref();
                     this.useFirebase = true;
-                    console.log('%c[V2T] Firebase Realtime DB connected ✅', 'color: #00f0ff; font-weight: bold;');
-                    resolve();
+
+                    // Prevent hanging: fallback to IndexedDB if connection is not established in 4 seconds
+                    let resolved = false;
+                    const timeout = setTimeout(() => {
+                        if (!resolved) {
+                            console.warn("[V2T] Firebase connection timed out. Falling back to local IndexedDB.");
+                            this.useFirebase = false;
+                            this.initIndexedDB(resolve, reject);
+                        }
+                    }, 4000);
+
+                    // Listen to database connection status
+                    this.dbRef.child('.info/connected').on('value', (snap) => {
+                        if (snap.val() === true && !resolved) {
+                            resolved = true;
+                            clearTimeout(timeout);
+                            console.log('%c[V2T] Firebase Realtime DB connected ✅', 'color: #00f0ff; font-weight: bold;');
+                            resolve();
+                        }
+                    });
                     return;
                 } catch (e) {
                     console.error("[V2T] Firebase init failed, falling back to IndexedDB:", e);
@@ -308,33 +326,37 @@ class DBManager {
                 console.warn("[V2T] No Firebase config found — using local IndexedDB.");
             }
 
-            const request = indexedDB.open(this.dbName, 3); // Upgraded to v3 to support price overrides
-            request.onblocked = () => {
-                console.warn("Database upgrade blocked by another open tab.");
-            };
-            request.onupgradeneeded = (e) => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains('portfolio_items')) {
-                    const store = db.createObjectStore('portfolio_items', { keyPath: 'id', autoIncrement: true });
-                    store.createIndex('category', 'category', { unique: false });
-                }
-                if (!db.objectStoreNames.contains('deleted_static_items')) {
-                    db.createObjectStore('deleted_static_items', { keyPath: 'cardId' });
-                }
-                if (!db.objectStoreNames.contains('overridden_prices')) {
-                    db.createObjectStore('overridden_prices', { keyPath: 'itemId' });
-                }
-            };
-            request.onsuccess = (e) => {
-                this.db = e.target.result;
-                this.db.onversionchange = () => {
-                    this.db.close();
-                    location.reload();
-                };
-                resolve();
-            };
-            request.onerror = (e) => reject(e.target.error);
+            this.initIndexedDB(resolve, reject);
         });
+    }
+
+    initIndexedDB(resolve, reject) {
+        const request = indexedDB.open(this.dbName, 3); // Upgraded to v3 to support price overrides
+        request.onblocked = () => {
+            console.warn("Database upgrade blocked by another open tab.");
+        };
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('portfolio_items')) {
+                const store = db.createObjectStore('portfolio_items', { keyPath: 'id', autoIncrement: true });
+                store.createIndex('category', 'category', { unique: false });
+            }
+            if (!db.objectStoreNames.contains('deleted_static_items')) {
+                db.createObjectStore('deleted_static_items', { keyPath: 'cardId' });
+            }
+            if (!db.objectStoreNames.contains('overridden_prices')) {
+                db.createObjectStore('overridden_prices', { keyPath: 'itemId' });
+            }
+        };
+        request.onsuccess = (e) => {
+            this.db = e.target.result;
+            this.db.onversionchange = () => {
+                this.db.close();
+                location.reload();
+            };
+            resolve();
+        };
+        request.onerror = (e) => reject(e.target.error);
     }
 
     getItems(category) {
