@@ -6,13 +6,13 @@
     <title>V2T Groups | Admin Operations Center</title>
     
     <!-- Central Stylesheet -->
-    <link rel="stylesheet" href="css/style.css?v=1.6">
+    <link rel="stylesheet" href="css/style.css?v=1.7">
 
     <!-- Firebase CDN & Config (loaded in head so inline scripts can use it) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=1.6"></script>
+    <script src="js/firebase-config.js?v=1.7"></script>
 </head>
 <body>
 
@@ -43,6 +43,10 @@
             <div class="hud-item">
                 <span>SECTOR:</span>
                 <span class="value" id="hud-sector-title">ADMINISTRATION</span>
+            </div>
+            <div class="hud-item" id="hud-db-status-container">
+                <span>DATABASE:</span>
+                <span class="value" id="hud-db-status" style="color: var(--neon-cyan);">CONNECTING...</span>
             </div>
             <div class="hud-item">
                 <span>CONTACT:</span>
@@ -190,6 +194,8 @@
 
             init() {
                 return new Promise((resolve, reject) => {
+                    const dbStatusEl = document.getElementById('hud-db-status');
+
                     // Check if Firebase config is set up
                     if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.databaseURL) {
                         try {
@@ -206,6 +212,10 @@
                                 if (!resolved) {
                                     console.warn("[V2T Admin] Firebase connection timed out. Falling back to local IndexedDB.");
                                     this.useFirebase = false;
+                                    if (dbStatusEl) {
+                                        dbStatusEl.textContent = 'LOCAL';
+                                        dbStatusEl.style.color = 'var(--neon-magenta)';
+                                    }
                                     this.initIndexedDB(resolve, reject);
                                 }
                             }, 4000);
@@ -216,6 +226,10 @@
                                     resolved = true;
                                     clearTimeout(timeout);
                                     console.log('%c[V2T Admin] Firebase Realtime DB connected ✅', 'color: #00f0ff; font-weight: bold;');
+                                    if (dbStatusEl) {
+                                        dbStatusEl.textContent = 'CLOUD';
+                                        dbStatusEl.style.color = 'var(--neon-green)';
+                                    }
                                     resolve();
                                 }
                             });
@@ -227,6 +241,10 @@
                         console.warn("[V2T Admin] No Firebase config — using local IndexedDB.");
                     }
 
+                    if (dbStatusEl) {
+                        dbStatusEl.textContent = 'LOCAL';
+                        dbStatusEl.style.color = 'var(--neon-magenta)';
+                    }
                     this.initIndexedDB(resolve, reject);
                 });
             }
@@ -805,6 +823,6 @@
         checkLogin();
     </script>
     <!-- Canvas background & interactions script -->
-    <script src="js/main.js?v=1.6"></script>
+    <script src="js/main.js?v=1.7"></script>
 </body>
 </html>

@@ -289,6 +289,8 @@ class DBManager {
 
     init() {
         return new Promise((resolve, reject) => {
+            const dbStatusEl = document.getElementById('hud-db-status');
+
             // Check if Firebase config is set up
             if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.databaseURL) {
                 try {
@@ -305,6 +307,10 @@ class DBManager {
                         if (!resolved) {
                             console.warn("[V2T] Firebase connection timed out. Falling back to local IndexedDB.");
                             this.useFirebase = false;
+                            if (dbStatusEl) {
+                                dbStatusEl.textContent = 'LOCAL';
+                                dbStatusEl.style.color = 'var(--neon-magenta)';
+                            }
                             this.initIndexedDB(resolve, reject);
                         }
                     }, 4000);
@@ -315,6 +321,10 @@ class DBManager {
                             resolved = true;
                             clearTimeout(timeout);
                             console.log('%c[V2T] Firebase Realtime DB connected ✅', 'color: #00f0ff; font-weight: bold;');
+                            if (dbStatusEl) {
+                                dbStatusEl.textContent = 'CLOUD';
+                                dbStatusEl.style.color = 'var(--neon-green)';
+                            }
                             resolve();
                         }
                     });
@@ -326,6 +336,10 @@ class DBManager {
                 console.warn("[V2T] No Firebase config found — using local IndexedDB.");
             }
 
+            if (dbStatusEl) {
+                dbStatusEl.textContent = 'LOCAL';
+                dbStatusEl.style.color = 'var(--neon-magenta)';
+            }
             this.initIndexedDB(resolve, reject);
         });
     }
