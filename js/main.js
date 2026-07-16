@@ -427,18 +427,82 @@ async function initCMS() {
 
     try {
         await dbManager.init();
-        
-        // 1. Hide default cards marked as deleted by admin
-        await hideDeletedStaticCards();
-        
-        // 2. Load custom items matching current category
-        await loadCustomItems();
 
-        // 3. Apply custom price overrides
-        await applyOverriddenPrices();
+        if (dbManager.useFirebase) {
+            // === REAL-TIME MODE: Listen for any changes in Firebase ===
+            // Fires immediately on load, then fires again on every future update
+            const db = dbManager.dbRef;
+
+            function reRenderGallery() {
+                // Collect all three nodes in parallel then re-render
+                Promise.all([
+                    new Promise(res => db.child('portfolio_items').once('value', s => res(s.val() || {}))),
+                    new Promise(res => db.child('deleted_static_items').once('value', s => res(s.val() || {}))),
+                    new Promise(res => db.child('overridden_prices').once('value', s => res(s.val() || {})))
+                ]).then(([items, deletedMap, pricesMap]) => {
+                    renderGalleryFromFirebase(items, deletedMap, pricesMap);
+                }).catch(err => console.error('Real-time re-render failed:', err));
+            }
+
+            // Attach listeners — triggers reRenderGallery whenever any node changes
+            db.child('portfolio_items').on('value', reRenderGallery);
+            db.child('deleted_static_items').on('value', reRenderGallery);
+            db.child('overridden_prices').on('value', reRenderGallery);
+
+        } else {
+            // === OFFLINE MODE: One-time IndexedDB load ===
+            await hideDeletedStaticCards();
+            await loadCustomItems();
+            await applyOverriddenPrices();
+        }
     } catch (err) {
         console.error("CMS load failed:", err);
     }
+}
+
+function renderGalleryFromFirebase(allItems, deletedMap, pricesMap) {
+    const grid = document.querySelector('.gallery-grid');
+    if (!grid) return;
+
+    // 1. Restore all original static cards (remove hidden class, undo previous hides)
+    document.querySelectorAll('.gallery-card:not(.custom-card)').forEach(card => {
+        card.style.display = '';
+    });
+
+    // 2. Hide static cards that admin marked as deleted
+    Object.keys(deletedMap).forEach(cardId => {
+        const card = document.getElementById(cardId);
+        if (card) card.style.display = 'none';
+    });
+
+    // 3. Apply price overrides to static cards
+    Object.keys(pricesMap).forEach(itemId => {
+        const card = document.getElementById(itemId);
+        if (card) {
+            const priceEl = card.querySelector('.gallery-price');
+            if (priceEl) priceEl.textContent = pricesMap[itemId];
+        }
+    });
+
+    // 4. Remove all previously rendered custom cards
+    document.querySelectorAll('.gallery-card.custom-card').forEach(c => c.remove());
+
+    // 5. Re-add custom items for this category
+    Object.keys(allItems).forEach(key => {
+        const item = allItems[key];
+        if (item.category !== currentCategory) return;
+
+        // Apply price override if exists for this custom card
+        const cardId = `custom-card-${key}`;
+        const displayPrice = pricesMap[cardId] || item.price;
+        const itemWithOverride = { ...item, id: key, price: displayPrice };
+
+        const cardHTML = createCustomCardHTML(itemWithOverride);
+        grid.insertAdjacentHTML('beforeend', cardHTML);
+    });
+
+    updateItemCounter();
+    if (typeof initLightbox === 'function') initLightbox();
 }
 
 async function hideDeletedStaticCards() {
