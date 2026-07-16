@@ -320,8 +320,8 @@
         // Login Submit
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const user = document.getElementById('login-username').value;
-            const pass = document.getElementById('login-password').value;
+            const user = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
 
             if (user === 'admin' && pass === 'Arjun12@') {
                 sessionStorage.setItem('v2t_admin_logged', 'true');
