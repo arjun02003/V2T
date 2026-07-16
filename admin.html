@@ -7,6 +7,12 @@
     
     <!-- Central Stylesheet -->
     <link rel="stylesheet" href="css/style.css?v=1.4">
+
+    <!-- Firebase CDN & Config (loaded in head so inline scripts can use it) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js?v=1.4"></script>
 </head>
 <body>
 
@@ -760,12 +766,6 @@
         // Initialize page login checks
         checkLogin();
     </script>
-
-    <!-- Firebase CDN & Config -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="js/firebase-config.js?v=1.4"></script>
     <!-- Canvas background & interactions script -->
     <script src="js/main.js?v=1.4"></script>
 </body>
