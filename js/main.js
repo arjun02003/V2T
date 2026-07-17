@@ -151,6 +151,11 @@ function init3DTilt() {
 let galleryItems = [];
 let currentIndex = 0;
 let lightboxInitialized = false;
+let firestoreGalleryItems = [];
+let firestoreGalleryUnsubscribe = null;
+let latestRealtimeItems = {};
+let latestDeletedMap = {};
+let latestPricesMap = {};
 
 function initLightbox() {
     const lightbox = document.getElementById('lightbox');
@@ -272,6 +277,55 @@ function rebuildGalleryItems() {
     });
 }
 
+function initFirestoreGalleryListener(category) {
+    if (!window.firebase || !window.firebase.firestore) return;
+
+    try {
+        if (firestoreGalleryUnsubscribe) {
+            firestoreGalleryUnsubscribe();
+            firestoreGalleryUnsubscribe = null;
+        }
+
+        const firestore = window.firebaseDb || window.firebase.firestore();
+        if (!firestore) return;
+
+        const query = firestore
+            .collection('galleries')
+            .where('category', '==', category)
+            .where('active', '==', true)
+            .orderBy('order', 'asc')
+            .orderBy('createdAt', 'desc');
+
+        firestoreGalleryUnsubscribe = query.onSnapshot((snapshot) => {
+            firestoreGalleryItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderGalleryFromFirebase(latestRealtimeItems, latestDeletedMap, latestPricesMap, firestoreGalleryItems);
+        }, (error) => {
+            console.error('[V2T] Firestore gallery listener failed:', error);
+        });
+    } catch (error) {
+        console.warn('[V2T] Firestore gallery sync unavailable:', error);
+    }
+}
+
+function createFirestoreCardHTML(item) {
+    const priceText = item.price || 'ENQUIRE';
+    const itemId = `firestore-card-${item.id}`;
+    return `
+        <div class="gallery-card custom-card firestore-card" id="${itemId}" data-db-id="${item.id}">
+            <div class="gallery-img-container">
+                <img src="${item.imageUrl || ''}" alt="${item.title || ''}" class="gallery-img" loading="lazy">
+            </div>
+            <div class="gallery-info">
+                <div>
+                    <span class="gallery-meta">FIRESTORE.${item.category?.toUpperCase() || 'ITEM'} // ${String(item.id).slice(0, 6)}</span>
+                    <h3 class="gallery-card-title">${item.title || 'Untitled'}</h3>
+                    <p class="gallery-card-desc">${item.description || 'No description available.'}</p>
+                </div>
+                <div class="gallery-price">${priceText}</div>
+            </div>
+        </div>
+    `;
+}
 
 /* 
 ========================================================================
@@ -481,7 +535,10 @@ async function initCMS() {
                     new Promise(res => db.child('deleted_static_items').once('value', s => res(s.val() || {}))),
                     new Promise(res => db.child('overridden_prices').once('value', s => res(s.val() || {})))
                 ]).then(([items, deletedMap, pricesMap]) => {
-                    renderGalleryFromFirebase(items, deletedMap, pricesMap);
+                    latestRealtimeItems = items;
+                    latestDeletedMap = deletedMap;
+                    latestPricesMap = pricesMap;
+                    renderGalleryFromFirebase(items, deletedMap, pricesMap, firestoreGalleryItems);
                 }).catch(err => console.error('Real-time re-render failed:', err));
             }
 
@@ -490,18 +547,25 @@ async function initCMS() {
             db.child('deleted_static_items').on('value', reRenderGallery);
             db.child('overridden_prices').on('value', reRenderGallery);
 
+            // Also sync Firestore gallery data if available
+            initFirestoreGalleryListener(currentCategory);
+
         } else {
             // === OFFLINE MODE: One-time IndexedDB load ===
             await hideDeletedStaticCards();
             await loadCustomItems();
             await applyOverriddenPrices();
+
+            if (window.firebase && (window.firebaseDb || window.firebase.firestore)) {
+                initFirestoreGalleryListener(currentCategory);
+            }
         }
     } catch (err) {
         console.error("CMS load failed:", err);
     }
 }
 
-function renderGalleryFromFirebase(allItems, deletedMap, pricesMap) {
+function renderGalleryFromFirebase(allItems, deletedMap, pricesMap, firestoreItems = []) {
     const grid = document.querySelector('.gallery-grid');
     if (!grid) return;
 
@@ -539,6 +603,13 @@ function renderGalleryFromFirebase(allItems, deletedMap, pricesMap) {
         const itemWithOverride = { ...item, id: key, price: displayPrice };
 
         const cardHTML = createCustomCardHTML(itemWithOverride);
+        grid.insertAdjacentHTML('beforeend', cardHTML);
+    });
+
+    // 6. Re-add Firestore-managed gallery items for this category
+    firestoreItems.forEach(item => {
+        if (!item || item.category !== currentCategory || item.active === false) return;
+        const cardHTML = createFirestoreCardHTML(item);
         grid.insertAdjacentHTML('beforeend', cardHTML);
     });
 

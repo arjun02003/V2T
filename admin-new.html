@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V2T Groups | Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css?v=2.0">
+    <style>
+        /* Admin-specific styles */
+        .admin-login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 10, 25, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+        }
+
+        .admin-login-form {
+            background: rgba(20, 20, 45, 0.9);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+        }
+
+        .admin-login-form h1 {
+            color: var(--neon-cyan);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--neon-cyan);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-magenta);
+            border-radius: 8px;
+            color: var(--neon-cyan);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 127, 0.2);
+            border: 1px solid var(--neon-magenta);
+            color: var(--neon-magenta);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .admin-content.authenticated {
+            display: block;
+        }
+
+        .admin-header {
+            padding: 20px;
+            background: rgba(20, 20, 45, 0.9);
+            border-bottom: 1px solid var(--neon-cyan);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 {
+            color: var(--neon-cyan);
+            margin: 0;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: var(--neon-magenta);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: var(--neon-orange);
+        }
+
+        .admin-main {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .admin-sidebar {
+            background: rgba(20, 20, 45, 0.9);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 10px;
+            padding: 20px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .category-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .category-btn {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 6px;
+            color: var(--neon-cyan);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-btn.active {
+            background: var(--neon-cyan);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .category-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .admin-content-area {
+            background: rgba(20, 20, 45, 0.9);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 10px;
+            padding: 20px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .upload-form {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--neon-magenta);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .upload-form h2 {
+            color: var(--neon-magenta);
+            margin-top: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 2px dashed var(--neon-cyan);
+            border-radius: 8px;
+            color: var(--neon-cyan);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .upload-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--neon-green);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-btn:hover {
+            opacity: 0.9;
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .gallery-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .gallery-table th {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--neon-cyan);
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--neon-cyan);
+        }
+
+        .gallery-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            color: var(--neon-cyan);
+        }
+
+        .gallery-table tr:hover {
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .gallery-img-thumb {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: var(--neon-cyan);
+            color: #000;
+        }
+
+        .delete-btn {
+            background: var(--neon-magenta);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            opacity: 0.8;
+        }
+
+        .delete-btn:hover {
+            opacity: 0.8;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--neon-cyan);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 240, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+
+        @media (max-width: 992px) {
+            .admin-main {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="admin-login-container" id="loginContainer">
+        <div class="admin-login-form">
+            <h1>🔐 V2T Admin</h1>
+            <div class="error-message" id="loginError"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="admin@v2tgroups.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="admin-content" id="adminContent">
+        <div class="admin-header">
+            <h1>📊 V2T Groups Admin Dashboard</h1>
+            <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        </div>
+
+        <div class="admin-main">
+            <!-- Sidebar -->
+            <div class="admin-sidebar">
+                <h3 style="color: var(--neon-cyan); margin-top: 0;">Categories</h3>
+                <div class="category-tabs">
+                    <button class="category-btn active" data-category="art">🎨 Art</button>
+                    <button class="category-btn" data-category="event">🎉 Events</button>
+                    <button class="category-btn" data-category="interior">🏠 Interior</button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="admin-content-area">
+                <div class="success-message" id="successMessage"></div>
+                
+                <!-- Upload Form -->
+                <div class="upload-form">
+                    <h2>Upload New Image</h2>
+                    <form id="uploadForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="title">Title</label>
+                                <input type="text" id="title" placeholder="Image title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="order">Order</label>
+                                <input type="number" id="order" value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" placeholder="Image description" style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--neon-magenta); border-radius: 8px; color: var(--neon-cyan); resize: vertical; min-height: 80px;"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="file-input-wrapper">
+                                <label for="imageFile" class="file-input-label">
+                                    📸 Click to upload or drag image (JPG, PNG, WebP • Max 5MB)
+                                </label>
+                                <input type="file" id="imageFile" accept="image/jpeg,image/png,image/webp" required>
+                                <div id="fileName" style="color: var(--neon-green); margin-top: 8px; font-size: 0.9rem;"></div>
+                            </div>
+                        </div>
+                        <div class="progress-bar" id="uploadProgress">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <button type="submit" class="upload-btn" id="uploadBtn">Upload Image</button>
+                    </form>
+                </div>
+
+                <!-- Gallery Table -->
+                <h2 style="color: var(--neon-cyan); margin-top: 30px;">Gallery Items</h2>
+                <div style="overflow-x: auto;">
+                    <table class="gallery-table" id="galleryTable">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Order</th>
+                                <th>Uploaded</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="galleryTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--neon-magenta);">
+                                    Select a category to view items
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <!-- Environment Configuration (load FIRST!) -->
+    <script src="js/env.js?v=2.0"></script>
+    
+    <!-- V2T Services -->
+    <script src="js/firebase-config.js?v=2.0" defer></script>
+    <script src="js/auth-service.js?v=2.0" defer></script>
+    <script src="js/firestore-service.js?v=2.0" defer></script>
+    <script src="js/storage-service.js?v=2.0" defer></script>
+
+    <!-- Admin Dashboard Script -->
+    <script src="js/admin-dashboard.js?v=2.0" defer></script>
+</body>
+</html>

@@ -32,9 +32,16 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env.local
+.env.local.example.local
 
 # vercel
 .vercel
+
+# Firebase credentials (NEVER commit these)
+firebase-config.local.js
+/firebase-credentials.json
+js/env.js
 
 # typescript
 *.tsbuildinfo
