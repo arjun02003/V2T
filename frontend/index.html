@@ -220,27 +220,12 @@
     <!-- Footer HUD -->
     <footer class="footer-hud" style="max-width: 1200px; margin: 40px auto 0 auto; padding: 30px 20px;">
         <span>V2T-CORE v2.8 // MAIN OPERATIONS DESK</span>
-        <a href="admin.html?v=1.7" class="footer-admin-link">SECURE ADMIN PANEL</a>
+<a href="admin-new.html?v=1.7" class="footer-admin-link">SECURE ADMIN PANEL</a>
         <span>© 2026 V2T GROUPS. ALL RIGHTS RESERVED</span>
     </footer>
 
-    <!-- Firebase CDN & Config -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Environment Configuration (load FIRST!) -->
-    <script src="js/env.js?v=2.0"></script>
-    
-    <!-- V2T Service Modules (Order matters!) -->
-    <script src="js/firebase-config.js?v=2.0" defer></script>
-    <script src="js/auth-service.js?v=2.0" defer></script>
-    <script src="js/firestore-service.js?v=2.0" defer></script>
-    <script src="js/storage-service.js?v=2.0" defer></script>
-    
-    <!-- Central Script Link -->
+    <!-- Environment Configuration -->
+    <script src="js/env-backend.js?v=2.0"></script>
     <script src="js/main.js?v=2.0" defer></script>
 </body>
 </html>

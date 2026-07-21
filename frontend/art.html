@@ -89,93 +89,8 @@
         </div>
 
         <!-- Responsive Gallery Grid -->
-        <section class="gallery-grid">
-
-            <!-- Item 1 -->
-            <div class="gallery-card" id="art-card-1">
-                <div class="gallery-img-container">
-                    <img src="images/art/art1.jpg" alt="Neurological Clay Reliefs" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.ART // 01</span>
-                        <h3 class="gallery-card-title">Neurological Clay Reliefs</h3>
-                        <p class="gallery-card-desc">
-                            A set of four framed handcrafted clay relief designs featuring anatomical brains, stethoscopes, and cellular patterns.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹15,000</div>
-                </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="gallery-card" id="art-card-2">
-                <div class="gallery-img-container">
-                    <img src="images/art/art2.jpg" alt="Wellness Cardiology Relief" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.ART // 02</span>
-                        <h3 class="gallery-card-title">Wellness Cardiology Relief</h3>
-                        <p class="gallery-card-desc">
-                            A dynamic clay nameplate sign for Wellness Heart Clinic, mapping an anatomical heart, pulses, and medical symbols.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹18,500</div>
-                </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="gallery-card" id="art-card-3">
-                <div class="gallery-img-container">
-                    <img src="images/art/art3.jpg" alt="Clinical Arts Collection" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.ART // 03</span>
-                        <h3 class="gallery-card-title">Clinical Arts Collection</h3>
-                        <p class="gallery-card-desc">
-                            A quad-frame display showcasing specialized medical branch reliefs, including pediatric teddy bears and neurological pathways.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹14,000</div>
-                </div>
-            </div>
-
-            <!-- Item 4 -->
-            <div class="gallery-card" id="art-card-4">
-                <div class="gallery-img-container">
-                    <img src="images/art/art4.jpg" alt="City Care Anatomy Relief" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.ART // 04</span>
-                        <h3 class="gallery-card-title">City Care Anatomy Relief</h3>
-                        <p class="gallery-card-desc">
-                            Dr. Chen's custom nameplate featuring high-detail clay reliefs of a biological heart, stethoscope, DNA helix, and leafy motifs.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹19,000</div>
-                </div>
-            </div>
-
-            <!-- Item 5 -->
-            <div class="gallery-card" id="art-card-5">
-                <div class="gallery-img-container">
-                    <img src="images/art/art5.jpg" alt="Medical Science Reliefs" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.ART // 05</span>
-                        <h3 class="gallery-card-title">Medical Science Reliefs</h3>
-                        <p class="gallery-card-desc">
-                            A quad-panel compilation detailing Pediatric, Neuroscience, Surgical, and Clinical care pathways in handcrafted clay.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹16,000</div>
-                </div>
-            </div>
-
+        <section class="gallery-grid" id="gallery-grid">
+            <div class="gallery-empty-state">Loading gallery...</div>
         </section>
     </main>
 
@@ -216,27 +131,13 @@
     <!-- Footer Operations Link -->
     <footer class="footer-hud">
         <span>V2T-CORE v2.8 // OPERATIONAL SECTOR: ART</span>
-        <a href="admin.html?v=1.7" class="footer-admin-link">SECURE ADMIN PANEL</a>
+        <a href="admin-new.html?v=1.0" class="footer-admin-link">SECURE ADMIN PANEL</a>
         <span>© 2026 V2T GROUPS. ALL RIGHTS RESERVED</span>
     </footer>
 
-    <!-- Firebase CDN & Config -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Environment Configuration (load FIRST!) -->
-    <script src="js/env.js?v=2.0"></script>
-    
-    <!-- V2T Service Modules (Order matters!) -->
-    <script src="js/firebase-config.js?v=2.0" defer></script>
-    <script src="js/auth-service.js?v=2.0" defer></script>
-    <script src="js/firestore-service.js?v=2.0" defer></script>
-    <script src="js/storage-service.js?v=2.0" defer></script>
-    
-    <!-- Central Script Link -->
+    <!-- Backend Environment Configuration -->
+    <script src="js/env-backend.js?v=2.0"></script>
+    <script src="js/gallery-service.js?v=1.0" defer></script>
     <script src="js/main.js?v=2.0" defer></script>
 </body>
 </html>

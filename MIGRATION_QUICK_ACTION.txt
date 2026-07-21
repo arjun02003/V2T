@@ -1,0 +1,191 @@
+# 🚀 QUICK ACTION - Database Setup in 3 Steps
+
+## Problem
+❌ Upload fails: `PGRST205: Could not find the table`
+
+## Root Cause
+❌ Tables `admins` and `galleries` do NOT exist
+
+## Solution - DO THIS NOW
+
+### STEP 1: Copy this SQL
+```sql
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE TABLE IF NOT EXISTS admins (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL UNIQUE,
+  password_hash text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS galleries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  description text NOT NULL,
+  category text NOT NULL CHECK (category IN ('art', 'event', 'interior')),
+  price text NOT NULL,
+  image_url text NOT NULL,
+  storage_path text NOT NULL,
+  "order" integer NOT NULL DEFAULT 0,
+  active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_galleries_category_active_order ON galleries (category, active, "order");
+```
+
+### STEP 2: Paste into Supabase
+https://supabase.com/dashboard/project/yqkuafohmzoyupvnebse/sql
+
+Click "New Query" → Paste → Click "Run"
+
+### STEP 3: Verify & Test
+```bash
+npm run debug-db
+npm start
+```
+
+---
+
+## What Gets Created
+
+### admins table (5 columns)
+- `id` - UUID primary key
+- `email` - Admin email (unique)
+- `password_hash` - bcrypt hash
+- `created_at` - Timestamp
+- `updated_at` - Timestamp
+
+### galleries table (11 columns)
+- `id` - UUID primary key
+- `title` - Item title
+- `description` - Item description
+- `category` - 'art' | 'event' | 'interior'
+- `price` - Display price
+- `image_url` - Public/signed URL
+- `storage_path` - Bucket path
+- `order` - Sort order
+- `active` - Visible flag
+- `created_at` - Timestamp
+- `updated_at` - Timestamp
+
+---
+
+## After Running SQL
+
+### Verify
+```bash
+npm run debug-db
+```
+Should show: ✅ All tests pass
+
+### Restart backend
+```bash
+npm start
+```
+
+### Test upload
+1. Open admin dashboard
+2. Upload image
+3. Fill details
+4. Click "Save"
+
+**Expected:** ✅ SUCCESS!
+
+---
+
+## If It Still Doesn't Work
+
+### Check logs
+```bash
+# Terminal 1: Backend
+npm start
+
+# Terminal 2: Run test
+npm run debug-db
+```
+
+### Read detailed docs
+- `DATABASE_MIGRATION_REPORT.md` - Full analysis
+- `MIGRATION_GUIDE.md` - Step-by-step guide
+- `DATABASE_DEBUG_REPORT.md` - Technical details
+
+---
+
+## Files Ready to Use
+
+| File | Purpose |
+|------|---------|
+| `backend/debug-database.js` | Check DB status |
+| `backend/migrate-direct.js` | Auto-migrate (with password) |
+| `backend/setup-migrations.js` | Interactive setup |
+| `backend/server.js` | Enhanced with full error logging |
+| `backend/run-migrations.js` | Supabase API migration |
+
+---
+
+## Commands Available
+
+```bash
+npm start              # Start backend
+npm run debug-db       # Check database status
+npm run setup          # Interactive setup wizard
+npm run migrate-direct # Auto-migration (requires PASSWORD)
+```
+
+---
+
+## Exact SQL Tables
+
+### admins
+```
+CREATE TABLE admins (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL UNIQUE,
+  password_hash text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+```
+
+### galleries
+```
+CREATE TABLE galleries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  description text NOT NULL,
+  category text NOT NULL CHECK (category IN ('art','event','interior')),
+  price text NOT NULL,
+  image_url text NOT NULL,
+  storage_path text NOT NULL,
+  "order" integer NOT NULL DEFAULT 0,
+  active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+```
+
+### Index
+```
+CREATE INDEX idx_galleries_category_active_order 
+  ON galleries (category, active, "order");
+```
+
+---
+
+## Done! 🎉
+
+Once SQL is run:
+1. ✅ Tables exist
+2. ✅ Upload works
+3. ✅ Database saves images
+4. ✅ Gallery displays items
+
+That's all you need to do!
+
+---
+
+See `MIGRATION_GUIDE.md` for detailed step-by-step instructions.

@@ -1,0 +1,28 @@
+{
+  "name": "v2t-backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "migrate": "node migrate.js",
+    "migrate-supabase": "node migrate-supabase.js",
+    "run-migrations": "node run-migrations.js",
+    "migrate-direct": "node migrate-direct.js",
+    "debug-db": "node debug-database.js",
+    "setup": "node setup-migrations.js",
+    "final-setup": "node final-setup.js",
+    "verify-upload-ready": "node verify-upload-ready.js",
+    "create-tables-https": "node create-tables-https.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.2",
+    "@supabase/supabase-js": "^2.31.0"
+  }
+}

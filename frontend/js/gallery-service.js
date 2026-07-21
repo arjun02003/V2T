@@ -5,7 +5,7 @@
 
 class GalleryService {
   constructor(apiBaseURL = 'http://localhost:3001/api') {
-    this.apiBaseURL = apiBaseURL;
+    this.apiBaseURL = apiBaseURL.replace(/\/$/, '');
     this.galleries = {
       art: [],
       event: [],
@@ -14,21 +14,24 @@ class GalleryService {
   }
 
   /**
-   * Initialize and load all galleries
+   * Initialize and load galleries for a category
    */
-  async init() {
+  async init(category = null) {
     try {
-      console.log('🔄 Loading galleries from backend...');
+      console.log('🔄 Loading gallery from backend...', category);
       
-      // Load each category
-      for (const category of ['art', 'event', 'interior']) {
+      if (category) {
         await this.loadCategory(category);
+      } else {
+        for (const cat of ['art', 'event', 'interior']) {
+          await this.loadCategory(cat);
+        }
       }
 
-      console.log('✅ Galleries loaded successfully');
+      console.log('✅ Gallery load complete');
       return this.galleries;
     } catch (error) {
-      console.error('❌ Failed to load galleries:', error);
+      console.error('❌ Failed to load gallery:', error);
       return null;
     }
   }
@@ -39,16 +42,17 @@ class GalleryService {
   async loadCategory(category) {
     try {
       const response = await fetch(
-        `${this.apiBaseURL}/gallery/${category}?active=true`,
+        `${this.apiBaseURL}/gallery/${encodeURIComponent(category)}?active=true`,
         { method: 'GET' }
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      this.galleries[category] = data.data || [];
+      this.galleries[category] = Array.isArray(data?.data) ? data.data : [];
       console.log(`✅ Loaded ${category}: ${this.galleries[category].length} items`);
     } catch (error) {
       console.warn(`⚠️ Failed to load ${category}:`, error);
@@ -81,7 +85,7 @@ class GalleryService {
    * Render gallery grid
    */
   renderGallery(category, containerSelector) {
-    const items = this.getCategory(category);
+    const items = this.getCategory(category) || [];
     const container = document.querySelector(containerSelector);
 
     if (!container) {
@@ -89,21 +93,33 @@ class GalleryService {
       return;
     }
 
+    container.innerHTML = '';
+
     if (items.length === 0) {
       container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No items available yet</p>';
+      const counter = document.getElementById('gallery-counter');
+      if (counter) counter.textContent = '00';
       return;
     }
 
     container.innerHTML = items.map(item => `
-      <div class="gallery-item" data-id="${item.id}">
-        <img src="${item.image_url}" alt="${item.title}" class="gallery-image">
+      <div class="gallery-card" data-id="${item.id}">
+        <div class="gallery-img-container">
+          <img src="${item.image_url}" alt="${item.title}" class="gallery-img" loading="lazy">
+        </div>
         <div class="gallery-info">
-          <h3>${item.title}</h3>
-          <p class="gallery-price">${item.price}</p>
-          <p class="gallery-desc">${item.description}</p>
+          <div>
+            <span class="gallery-meta">${item.category?.toUpperCase() || 'ITEM'} // ${String(item.id).slice(0, 6)}</span>
+            <h3 class="gallery-card-title">${item.title}</h3>
+            <p class="gallery-card-desc">${item.description}</p>
+          </div>
+          <div class="gallery-price">${item.price}</div>
         </div>
       </div>
     `).join('');
+
+    const counter = document.getElementById('gallery-counter');
+    if (counter) counter.textContent = String(items.length).padStart(2, '0');
   }
 }
 
@@ -111,8 +127,3 @@ class GalleryService {
 window.galleryService = new GalleryService(
   window.API_BASE_URL || 'http://localhost:3001/api'
 );
-
-// Auto-load galleries when page loads
-document.addEventListener('DOMContentLoaded', async () => {
-  await window.galleryService.init();
-});

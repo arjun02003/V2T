@@ -18,14 +18,14 @@ class AdminDashboard {
 
   cacheDOM() {
     // Login
-    this.loginContainer = document.getElementById('loginContainer');
-    this.adminContent = document.getElementById('adminContent');
-    this.loginForm = document.getElementById('loginForm');
+    this.loginContainer = document.getElementById('loginContainer') || document.getElementById('login-container');
+    this.adminContent = document.getElementById('adminContent') || document.getElementById('admin-dashboard');
+    this.loginForm = document.getElementById('loginForm') || document.getElementById('login-form');
     this.loginError = document.getElementById('loginError');
-    this.loginBtn = document.getElementById('loginBtn');
+    this.loginBtn = document.getElementById('loginBtn') || this.loginForm?.querySelector('button[type="submit"]');
 
     // Admin
-    this.logoutBtn = document.getElementById('logoutBtn');
+    this.logoutBtn = document.getElementById('logoutBtn') || document.getElementById('btn-logout');
     this.categoryBtns = document.querySelectorAll('.category-btn');
     
     // Upload
@@ -37,7 +37,7 @@ class AdminDashboard {
     this.orderInput = document.getElementById('order');
     this.fileNameDisplay = document.getElementById('fileName');
     this.uploadProgress = document.getElementById('uploadProgress');
-    this.progressFill = this.uploadProgress.querySelector('.progress-fill');
+    this.progressFill = this.uploadProgress?.querySelector('.progress-fill') || null;
 
     // Gallery Table
     this.galleryTableBody = document.getElementById('galleryTableBody');
@@ -48,69 +48,53 @@ class AdminDashboard {
 
   bindEvents() {
     // Login
-    this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-    this.logoutBtn.addEventListener('click', () => this.handleLogout());
+    this.loginForm?.addEventListener('submit', (e) => this.handleLogin(e));
+    this.logoutBtn?.addEventListener('click', () => this.handleLogout());
 
     // Categories
-    this.categoryBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => this.switchCategory(e.target.dataset.category));
-    });
+    if (this.categoryBtns && this.categoryBtns.length > 0) {
+      this.categoryBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => this.switchCategory(e.target.dataset.category));
+      });
+    }
 
     // Upload
-    this.uploadForm.addEventListener('submit', (e) => this.handleUpload(e));
-    this.imageFileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+    this.uploadForm?.addEventListener('submit', (e) => this.handleUpload(e));
+    this.imageFileInput?.addEventListener('change', (e) => this.handleFileSelect(e));
 
     // Drag and drop
     const fileLabel = document.querySelector('.file-input-label');
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      fileLabel.addEventListener(eventName, (e) => e.preventDefault());
-    });
-    fileLabel.addEventListener('drop', (e) => {
-      this.imageFileInput.files = e.dataTransfer.files;
-      this.handleFileSelect({ target: this.imageFileInput });
-    });
+    if (fileLabel && this.imageFileInput) {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        fileLabel.addEventListener(eventName, (e) => e.preventDefault());
+      });
+      fileLabel.addEventListener('drop', (e) => {
+        this.imageFileInput.files = e.dataTransfer.files;
+        this.handleFileSelect({ target: this.imageFileInput });
+      });
+    }
   }
 
   async initServices() {
     try {
-      console.log('[Admin] Initializing services...');
-      
-      // Wait for services to initialize
-      let retries = 10;
-      while (!window.authService?.initialized && retries > 0) {
-        await new Promise(r => setTimeout(r, 100));
-        retries--;
-      }
+      console.log('[Admin] Initializing backend auth services...');
 
-      if (!window.authService?.initialized) {
-        const errorMsg = `
-🔥 Firebase Not Configured
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-To use the admin dashboard:
-
-1. Go to https://console.firebase.google.com/
-2. Create a new project
-3. Get your Web app credentials
-4. Edit js/env.js and add your credentials
-5. Refresh this page
-
-See SETUP_GUIDE.md for detailed steps.
-`;
-        throw new Error(errorMsg);
-      }
-
-      // Subscribe to auth state
-      window.authService.onAuthStateChanged((user) => {
-        this.currentUser = user;
-        if (user) {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        window.apiClient.token = token;
+        try {
+          await window.apiClient.verifyToken();
           this.showAdminPanel();
           this.loadGalleries();
-        } else {
-          this.showLoginPanel();
+          return;
+        } catch (verifyError) {
+          console.warn('[Admin] Token verification failed:', verifyError);
+          window.apiClient.logout();
         }
-      });
+      }
 
-      console.log('[Admin] Services initialized ✅');
+      this.showLoginPanel();
+      console.log('[Admin] Backend auth initialized ✅');
     } catch (error) {
       console.error('[Admin] Init error:', error);
       this.showLoginError(error.message || 'Failed to initialize. Check console for details.');
@@ -119,10 +103,12 @@ See SETUP_GUIDE.md for detailed steps.
 
   async handleLogin(e) {
     e.preventDefault();
-    this.loginError.classList.remove('show');
+    this.loginError?.classList.remove('show');
 
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const email = emailInput?.value.trim() || '';
+    const password = passwordInput?.value || '';
 
     if (!email || !password) {
       this.showLoginError('Please enter email and password');
@@ -134,12 +120,17 @@ See SETUP_GUIDE.md for detailed steps.
     this.loginBtn.innerHTML = '<span class="loading-spinner"></span>Signing in...';
 
     try {
-      const user = await window.authService.signIn(email, password);
-      console.log('[Admin] Login successful:', user.uid);
+      const data = await window.apiClient.login(email, password);
+      console.log('[Admin] Login successful:', data);
+      if (!data.token) {
+        throw new Error('Login succeeded but no token was returned');
+      }
       this.loginForm.reset();
+      this.showAdminPanel();
+      this.loadGalleries();
     } catch (error) {
       console.error('[Admin] Login error:', error);
-      this.showLoginError(error.message);
+      this.showLoginError(error.message || 'Login failed');
     } finally {
       this.loginBtn.disabled = false;
       this.loginBtn.textContent = originalText;
@@ -152,8 +143,9 @@ See SETUP_GUIDE.md for detailed steps.
     }
 
     try {
-      await window.authService.signOut();
-      this.unsubscribeAllListeners();
+      window.apiClient.logout();
+      this.unsubscribeAllListeners?.();
+      this.showLoginPanel();
       console.log('[Admin] Logout successful');
     } catch (error) {
       console.error('[Admin] Logout error:', error);
@@ -243,8 +235,10 @@ See SETUP_GUIDE.md for detailed steps.
 
     this.isUploadingPhoto = true;
     this.uploadBtn.disabled = true;
-    this.uploadProgress.classList.add('active');
-    this.progressFill.style.width = '0%';
+    this.uploadProgress?.classList.add('active');
+    if (this.progressFill) {
+      this.progressFill.style.width = '0%';
+    }
 
     try {
       // Upload image
@@ -253,7 +247,9 @@ See SETUP_GUIDE.md for detailed steps.
         file,
         this.currentCategory,
         (progress) => {
-          this.progressFill.style.width = progress + '%';
+          if (this.progressFill) {
+            this.progressFill.style.width = progress + '%';
+          }
         }
       );
 
@@ -308,6 +304,7 @@ See SETUP_GUIDE.md for detailed steps.
   }
 
   renderGalleryTable() {
+    if (!this.galleryTableBody) return;
     if (!this.galleries || this.galleries.length === 0) {
       this.galleryTableBody.innerHTML = `
         <tr>

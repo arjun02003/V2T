@@ -29,21 +29,33 @@ class APIClient {
       ...options
     };
 
+    console.log('API Request:', endpoint, config);
+
     try {
       const response = await fetch(url, config);
 
-      // Handle 401 - unauthorized
       if (response.status === 401) {
-        this.logout();
-        throw new Error('Session expired. Please login again.');
+        const errorData = await response.json().catch(() => ({}));
+        const message = errorData.error || 'Unauthorized';
+
+        if (endpoint !== '/auth/login') {
+          this.logout();
+          console.error('API 401 detected on protected endpoint:', endpoint, message);
+          throw new Error('Session expired. Please login again.');
+        }
+
+        console.warn('Login endpoint returned 401:', message);
+        throw new Error(message);
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `HTTP Error: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('API Response:', endpoint, result);
+      return result;
     } catch (error) {
       console.error(`API Error [${endpoint}]:`, error);
       throw error;
@@ -56,14 +68,18 @@ class APIClient {
    * Login with username and password
    */
   async login(username, password) {
+    const payload = { email: username, password };
+    console.log('Login request payload:', { email: payload.email });
+
     const data = await this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify(payload)
     });
 
     if (data.token) {
       this.token = data.token;
       localStorage.setItem('auth_token', data.token);
+      console.log('Login token stored:', data.token?.slice(0, 20) + '...');
     }
 
     return data;
@@ -80,6 +96,7 @@ class APIClient {
    * Logout
    */
   logout() {
+    console.log('Logging out, clearing token');
     this.token = null;
     localStorage.removeItem('auth_token');
   }
@@ -132,9 +149,10 @@ class APIClient {
   /**
    * Upload image file
    */
-  async uploadFile(file) {
+  async uploadFile(file, category = 'general') {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('category', category);
 
     try {
       const response = await fetch(`${this.baseURL}/upload`, {
@@ -146,8 +164,9 @@ class APIClient {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Upload failed');
+        const errorData = await response.json().catch(() => ({}));
+        const detail = errorData.details ? ` (${JSON.stringify(errorData.details)})` : '';
+        throw new Error(errorData.error ? `${errorData.error}${detail}` : 'Upload failed');
       }
 
       return await response.json();

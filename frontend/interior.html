@@ -89,93 +89,8 @@
         </div>
 
         <!-- Responsive Gallery Grid -->
-        <section class="gallery-grid">
-
-            <!-- Item 1 -->
-            <div class="gallery-card" id="interior-card-1">
-                <div class="gallery-img-container">
-                    <img src="images/interior/interior1.jpg" alt="Nordic Minimalist Salon" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.INT // 01</span>
-                        <h3 class="gallery-card-title">Nordic Minimalist Salon</h3>
-                        <p class="gallery-card-desc">
-                            A light, airy living space integrating a soft grey linen sofa, solid oak barrel side tables, and natural potted plants.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹1,20,000</div>
-                </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="gallery-card" id="interior-card-2">
-                <div class="gallery-img-container">
-                    <img src="images/interior/interior2.jpg" alt="Grand Loft Living Room" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.INT // 02</span>
-                        <h3 class="gallery-card-title">Grand Loft Living Room</h3>
-                        <p class="gallery-card-desc">
-                            A double-height modern penthouse featuring dark concrete panels, a massive stone fireplace mantle, and minimalist seating.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹3,50,000</div>
-                </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="gallery-card" id="interior-card-3">
-                <div class="gallery-img-container">
-                    <img src="images/interior/interior3.jpg" alt="Contemporary Dining Nook" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.INT // 03</span>
-                        <h3 class="gallery-card-title">Contemporary Dining Nook</h3>
-                        <p class="gallery-card-desc">
-                            A warm dining area framed by vertical wood slat screens, geometric circular wall ornaments, and smart drop lighting.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹95,000</div>
-                </div>
-            </div>
-
-            <!-- Item 4 -->
-            <div class="gallery-card" id="interior-card-4">
-                <div class="gallery-img-container">
-                    <img src="images/interior/interior4.jpg" alt="Organic Live-Edge Lounge" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.INT // 04</span>
-                        <h3 class="gallery-card-title">Organic Live-Edge Lounge</h3>
-                        <p class="gallery-card-desc">
-                            A bespoke lounge featuring a large live-edge wood root panel integrated directly as wall shelving and glowing teardrop lamps.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹1,80,000</div>
-                </div>
-            </div>
-
-            <!-- Item 5 -->
-            <div class="gallery-card" id="interior-card-5">
-                <div class="gallery-img-container">
-                    <img src="images/interior/interior5.jpg" alt="Bespoke Master Suite" class="gallery-img" loading="lazy">
-                </div>
-                <div class="gallery-info">
-                    <div>
-                        <span class="gallery-meta">SYS.INT // 05</span>
-                        <h3 class="gallery-card-title">Bespoke Master Suite</h3>
-                        <p class="gallery-card-desc">
-                            An elegant master bedroom decorated with classic wall moldings, matching wood side stands, and warm organic paintings.
-                        </p>
-                    </div>
-                    <div class="gallery-price">₹2,20,000</div>
-                </div>
-            </div>
-
+        <section class="gallery-grid" id="gallery-grid">
+            <div class="gallery-empty-state">Loading gallery...</div>
         </section>
     </main>
 
@@ -216,27 +131,13 @@
     <!-- Footer Operations Link -->
     <footer class="footer-hud">
         <span>V2T-CORE v2.8 // OPERATIONAL SECTOR: INTERIORS</span>
-        <a href="admin.html?v=1.7" class="footer-admin-link">SECURE ADMIN PANEL</a>
+        <a href="admin-new.html?v=1.0" class="footer-admin-link">SECURE ADMIN PANEL</a>
         <span>© 2026 V2T GROUPS. ALL RIGHTS RESERVED</span>
     </footer>
 
-    <!-- Firebase CDN & Config -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Environment Configuration (load FIRST!) -->
-    <script src="js/env.js?v=2.0"></script>
-    
-    <!-- V2T Service Modules (Order matters!) -->
-    <script src="js/firebase-config.js?v=2.0" defer></script>
-    <script src="js/auth-service.js?v=2.0" defer></script>
-    <script src="js/firestore-service.js?v=2.0" defer></script>
-    <script src="js/storage-service.js?v=2.0" defer></script>
-    
-    <!-- Central Script Link -->
+    <!-- Backend Environment Configuration -->
+    <script src="js/env-backend.js?v=2.0"></script>
+    <script src="js/gallery-service.js?v=1.0" defer></script>
     <script src="js/main.js?v=2.0" defer></script>
 </body>
 </html>

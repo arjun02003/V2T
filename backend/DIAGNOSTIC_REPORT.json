@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-07-21T13:03:54.495Z",
+  "tables_found": [],
+  "table_used": "galleries",
+  "columns_found": [],
+  "required_columns": {
+    "id": false,
+    "title": false,
+    "description": false,
+    "category": false,
+    "price": false,
+    "image_url": false,
+    "storage_path": false,
+    "order": false,
+    "active": false,
+    "created_at": false,
+    "updated_at": false
+  },
+  "insert_query": {
+    "table": "public.galleries",
+    "payload": {
+      "title": "[DIAGNOSTIC-TEST] 2026-07-21T13:03:55.910Z",
+      "description": "Diagnostic test record from full-diagnostic.js",
+      "category": "art",
+      "price": "9999",
+      "image_url": "https://diagnostic.test/image.jpg",
+      "storage_path": "diagnostic/test-1784639035910.jpg"
+    }
+  },
+  "insert_result": "FAILED",
+  "insert_error": {
+    "code": "PGRST205",
+    "details": null,
+    "hint": null,
+    "message": "Could not find the table 'public.galleries' in the schema cache"
+  },
+  "supabase_response": {
+    "code": "PGRST205",
+    "details": null,
+    "hint": null,
+    "message": "Could not find the table 'public.galleries' in the schema cache"
+  },
+  "backend_ready": false,
+  "migrations_found": [
+    "001_init.sql"
+  ],
+  "migrations_executed": [],
+  "root_cause": "PGRST205: Could not find the table 'public.galleries' in the schema cache"
+}
