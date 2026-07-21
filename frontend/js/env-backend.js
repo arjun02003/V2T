@@ -5,7 +5,7 @@
 
 // ========== API CONFIGURATION ==========
 // Point to your backend server
-window.API_BASE_URL = 'http://localhost:3001/api';
+window.API_BASE_URL = 'https://v2t-group.onrender.com/api';
 
 // For production, use your server URL:
 // window.API_BASE_URL = 'https://api.yourdomain.com/api';
